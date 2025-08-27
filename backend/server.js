@@ -4,7 +4,6 @@ const fs = require('fs');
 const path = require('path');
 const multer = require('multer');
 const play = require('play-dl');
-const ytdlp = require('yt-dlp-exec');
 const rangeParser = require('range-parser');
 
 if (process.env.YOUTUBE_COOKIE) {
@@ -53,21 +52,35 @@ app.post('/api/download-youtube', async (req, res) => {
     const title = video.video_details.title.replace(/[<>:"/|?*]/g, ''); // Sanitize filename
     const filePath = path.join(musicDir, `${title}.mp3`);
 
-    // Use yt-dlp-exec to download audio
-    await ytdlp(url, {
-      output: filePath,
-      extractAudio: true,
-      audioFormat: 'mp3',
-      audioQuality: 0,
-      noCheckCertificate: true,
-      noWarnings: true,
-      preferFreeFormats: true,
-      addMetadata: true,
-      ffmpegLocation: 'ffmpeg', // Assumes ffmpeg is installed and in PATH
-      forceIpv4: true,
+    const stream = await play.stream(url, {
+      quality: 'highestaudio',
+      backend: 'yt-dlp',
+      ytDlpOptions: ['--force-ipv4'],
     });
 
-    res.json({ message: 'Download complete!', filename: `${title}.mp3` });
+    if (!stream || !stream.stream) {
+      return res.status(500).json({ error: 'Could not get stream' });
+    }
+
+    const fileStream = fs.createWriteStream(filePath);
+
+    stream.stream.on('error', (err) => {
+      console.error('Error in readable stream:', err);
+      res.status(500).json({ error: 'Error with the download stream' });
+      fileStream.close();
+    });
+
+    stream.stream.pipe(fileStream);
+
+    fileStream.on('finish', () => {
+      res.json({ message: 'Download complete!', filename: `${title}.mp3` });
+    });
+
+    fileStream.on('error', (err) => {
+      console.error('Error writing file:', err);
+      res.status(500).json({ error: 'Error saving the file' });
+    });
+
   } catch (error) {
     console.error('Error downloading from YouTube:', error);
     res.status(500).json({ error: 'Error downloading from YouTube' });
