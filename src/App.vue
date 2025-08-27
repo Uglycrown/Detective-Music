@@ -9,7 +9,7 @@ const youtubeUrl = ref('');
 
 const fetchSongs = async () => {
   try {
-    const response = await fetch('http://localhost:3000/api/songs');
+    const response = await fetch('https://detective-music.onrender.com/api/songs');
     if (response.ok) {
       const data = await response.json();
       songs.value = data;
@@ -26,7 +26,7 @@ onMounted(fetchSongs);
 const playSong = (song) => {
   currentSong.value = song;
   if (audioPlayer.value) {
-    audioPlayer.value.src = `http://localhost:3000/api/songs/${song}`;
+    audioPlayer.value.src = `https://detective-music.onrender.com/api/songs/${song}`;
     audioPlayer.value.play();
   }
 };
@@ -55,7 +55,7 @@ const handleFileUpload = async () => {
   formData.append('song', file);
 
   try {
-    const response = await fetch('http://localhost:3000/api/upload', {
+    const response = await fetch('https://detective-music.onrender.com/api/upload', {
       method: 'POST',
       body: formData,
     });
@@ -76,7 +76,7 @@ const handleYoutubeDownload = async () => {
   if (!youtubeUrl.value) return;
 
   try {
-    const response = await fetch('http://localhost:3000/api/download-youtube', {
+    const response = await fetch('https://detective-music.onrender.com/api/download-youtube', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
