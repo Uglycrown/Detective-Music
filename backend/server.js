@@ -4,7 +4,9 @@ const fs = require('fs');
 const path = require('path');
 const multer = require('multer');
 const play = require('play-dl');
-play.setToken({ youtube: { cookie: process.env.YOUTUBE_COOKIE } });
+if (process.env.YOUTUBE_COOKIE) {
+  play.setToken({ youtube: { cookie: process.env.YOUTUBE_COOKIE } });
+}
 const rangeParser = require('range-parser');
 
 const app = express();
