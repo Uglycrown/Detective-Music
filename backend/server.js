@@ -3,15 +3,7 @@ const cors = require('cors');
 const fs = require('fs');
 const path = require('path');
 const multer = require('multer');
-const play = require('play-dl');
-if (process.env.YOUTUBE_COOKIE) {
-  play.setToken({
-    youtube: {
-      cookie: process.env.YOUTUBE_COOKIE,
-      user_agent: process.env.YOUTUBE_USER_AGENT,
-    },
-  });
-}
+const ytdl = require('@distube/ytdl-core');
 const rangeParser = require('range-parser');
 
 const app = express();
@@ -42,34 +34,19 @@ app.post('/api/upload', upload.single('song'), (req, res) => {
 // Endpoint to download YouTube video audio
 app.post('/api/download-youtube', async (req, res) => {
   const { url } = req.body;
-  if (!url || !play.yt_validate(url)) {
+  if (!url || !ytdl.validateURL(url)) {
     return res.status(400).json({ error: 'Invalid YouTube URL' });
   }
 
   try {
-    const video = await play.video_info(url);
-    const title = video.video_details.title.replace(/[<>:"/|?*]/g, ''); // Sanitize filename
+    const info = await ytdl.getInfo(url);
+    const title = info.videoDetails.title.replace(/[<>:"/|?*]/g, ''); // Sanitize filename
     const filePath = path.join(musicDir, `${title}.mp3`);
 
-    const stream = await play.stream(url, { 
-      quality: 'highestaudio', 
-      backend: 'yt-dlp',
-      ytDlpOptions: ['--force-ipv4'],
-    });
-    
-    if (!stream || !stream.stream) {
-      return res.status(500).json({ error: 'Could not get stream' });
-    }
-
+    const audioStream = ytdl(url, { filter: 'audioonly' });
     const fileStream = fs.createWriteStream(filePath);
 
-    stream.stream.on('error', (err) => {
-      console.error('Error in readable stream:', err);
-      res.status(500).json({ error: 'Error with the download stream' });
-      fileStream.close();
-    });
-
-    stream.stream.pipe(fileStream);
+    audioStream.pipe(fileStream);
 
     fileStream.on('finish', () => {
       res.json({ message: 'Download complete!', filename: `${title}.mp3` });
