@@ -51,7 +51,11 @@ app.post('/api/download-youtube', async (req, res) => {
     const title = video.video_details.title.replace(/[<>:"/|?*]/g, ''); // Sanitize filename
     const filePath = path.join(musicDir, `${title}.mp3`);
 
-    const stream = await play.stream(url, { quality: 'highestaudio', backend: 'yt-dlp' });
+    const stream = await play.stream(url, { 
+      quality: 'highestaudio', 
+      backend: 'yt-dlp',
+      ytDlpOptions: ['--force-ipv4'],
+    });
     
     if (!stream || !stream.stream) {
       return res.status(500).json({ error: 'Could not get stream' });
