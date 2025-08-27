@@ -15,7 +15,8 @@
     "cors": "^2.8.5",
     "express": "^5.1.0",
     "multer": "^2.0.2",
-    "@distube/ytdl-core": "^2.1.9",
-    "range-parser": "^1.2.1"
+    "play-dl": "^1.9.7",
+    "range-parser": "^1.2.1",
+    "yt-dlp-wrap": "^2.3.12"
   }
 }
