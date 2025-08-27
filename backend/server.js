@@ -4,6 +4,7 @@ const fs = require('fs');
 const path = require('path');
 const multer = require('multer');
 const play = require('play-dl');
+play.setToken({ youtube: { cookie: process.env.YOUTUBE_COOKIE } });
 const rangeParser = require('range-parser');
 
 const app = express();
@@ -43,8 +44,19 @@ app.post('/api/download-youtube', async (req, res) => {
     const title = video.video_details.title.replace(/[<>:"/|?*]/g, ''); // Sanitize filename
     const filePath = path.join(musicDir, `${title}.mp3`);
 
-    const stream = await play.stream(url, { filter: 'audioonly' });
+    const stream = await play.stream(url, { quality: 'highestaudio' });
+    
+    if (!stream || !stream.stream) {
+      return res.status(500).json({ error: 'Could not get stream' });
+    }
+
     const fileStream = fs.createWriteStream(filePath);
+
+    stream.stream.on('error', (err) => {
+      console.error('Error in readable stream:', err);
+      res.status(500).json({ error: 'Error with the download stream' });
+      fileStream.close();
+    });
 
     stream.stream.pipe(fileStream);
 
