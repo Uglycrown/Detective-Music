@@ -3,7 +3,7 @@ const cors = require('cors');
 const fs = require('fs');
 const path = require('path');
 const multer = require('multer');
-const ytdl = require('@distube/ytdl-core');
+const play = require('play-dl');
 const rangeParser = require('range-parser');
 
 const app = express();
@@ -34,19 +34,19 @@ app.post('/api/upload', upload.single('song'), (req, res) => {
 // Endpoint to download YouTube video audio
 app.post('/api/download-youtube', async (req, res) => {
   const { url } = req.body;
-  if (!url || !ytdl.validateURL(url)) {
+  if (!url || !play.yt_validate(url)) {
     return res.status(400).json({ error: 'Invalid YouTube URL' });
   }
 
   try {
-    const info = await ytdl.getInfo(url);
-    const title = info.videoDetails.title.replace(/[<>:"/|?*]/g, ''); // Sanitize filename
+    const video = await play.video_info(url);
+    const title = video.video_details.title.replace(/[<>:"/|?*]/g, ''); // Sanitize filename
     const filePath = path.join(musicDir, `${title}.mp3`);
 
-    const audioStream = ytdl(url, { filter: 'audioonly' });
+    const stream = await play.stream(url, { filter: 'audioonly' });
     const fileStream = fs.createWriteStream(filePath);
 
-    audioStream.pipe(fileStream);
+    stream.stream.pipe(fileStream);
 
     fileStream.on('finish', () => {
       res.json({ message: 'Download complete!', filename: `${title}.mp3` });
