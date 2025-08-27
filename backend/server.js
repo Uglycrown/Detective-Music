@@ -5,7 +5,12 @@ const path = require('path');
 const multer = require('multer');
 const play = require('play-dl');
 if (process.env.YOUTUBE_COOKIE) {
-  play.setToken({ youtube: { cookie: process.env.YOUTUBE_COOKIE } });
+  play.setToken({
+    youtube: {
+      cookie: process.env.YOUTUBE_COOKIE,
+      user_agent: process.env.YOUTUBE_USER_AGENT,
+    },
+  });
 }
 const rangeParser = require('range-parser');
 
