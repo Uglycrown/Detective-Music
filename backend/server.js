@@ -3,16 +3,19 @@ const cors = require('cors');
 const fs = require('fs');
 const path = require('path');
 const multer = require('multer');
-const play = require('play-dl');
+const ytdl = require('ytdl-core'); // CHANGED: Replaced play-dl with ytdl-core
 const rangeParser = require('range-parser');
 
+// NEW: ytdl-core options object for handling authentication
+const ytdlOptions = {};
 if (process.env.YOUTUBE_COOKIE) {
-  play.setToken({
-    youtube: {
+  ytdlOptions.requestOptions = {
+    headers: {
       cookie: process.env.YOUTUBE_COOKIE,
-      user_agent: process.env.YOUTUBE_USER_AGENT,
+      // User-agent might be needed for some requests to succeed
+      'user-agent': process.env.YOUTUBE_USER_AGENT || 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.101 Safari/537.36',
     },
-  });
+  };
 }
 
 const app = express();
@@ -23,7 +26,12 @@ app.use(express.json());
 
 const musicDir = path.join(__dirname, 'music');
 
-// Multer storage configuration
+// Ensure music directory exists
+if (!fs.existsSync(musicDir)){
+    fs.mkdirSync(musicDir);
+}
+
+// Multer storage configuration (no changes here)
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, musicDir);
@@ -35,42 +43,44 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
-// Endpoint to upload a song
+// Endpoint to upload a song (no changes here)
 app.post('/api/upload', upload.single('song'), (req, res) => {
   res.json({ message: 'Song uploaded successfully!' });
 });
 
-// Endpoint to download YouTube video audio
+// Endpoint to download YouTube video audio - REWRITTEN LOGIC
 app.post('/api/download-youtube', async (req, res) => {
   const { url } = req.body;
-  if (!url || !play.yt_validate(url)) {
+  // CHANGED: Use ytdl.validateURL for validation
+  if (!url || !ytdl.validateURL(url)) {
     return res.status(400).json({ error: 'Invalid YouTube URL' });
   }
 
   try {
-    const video = await play.video_info(url);
-    const title = video.video_details.title.replace(/[<>:"/|?*]/g, ''); // Sanitize filename
+    // CHANGED: Use ytdl.getInfo to fetch video details
+    const info = await ytdl.getInfo(url, ytdlOptions);
+    // CHANGED: Title is located in a different property
+    const title = info.videoDetails.title.replace(/[<>:"/\\|?*]/g, ''); // Sanitize filename
     const filePath = path.join(musicDir, `${title}.mp3`);
 
-    const stream = await play.stream(url, {
+    // CHANGED: The main ytdl function returns a stream directly
+    const stream = ytdl(url, {
+      ...ytdlOptions,
+      filter: 'audioonly',
       quality: 'highestaudio',
-      backend: 'yt-dlp',
-      ytDlpOptions: ['--force-ipv4'],
     });
-
-    if (!stream || !stream.stream) {
-      return res.status(500).json({ error: 'Could not get stream' });
-    }
 
     const fileStream = fs.createWriteStream(filePath);
 
-    stream.stream.on('error', (err) => {
-      console.error('Error in readable stream:', err);
+    // CHANGED: Attach error handler directly to the stream from ytdl
+    stream.on('error', (err) => {
+      console.error('Error in ytdl readable stream:', err);
       res.status(500).json({ error: 'Error with the download stream' });
       fileStream.close();
     });
 
-    stream.stream.pipe(fileStream);
+    // CHANGED: Pipe the stream directly
+    stream.pipe(fileStream);
 
     fileStream.on('finish', () => {
       res.json({ message: 'Download complete!', filename: `${title}.mp3` });
@@ -88,7 +98,7 @@ app.post('/api/download-youtube', async (req, res) => {
 });
 
 
-// Endpoint to get the list of songs
+// Endpoint to get the list of songs (no changes here)
 app.get('/api/songs', (req, res) => {
   fs.readdir(musicDir, (err, files) => {
     if (err) {
@@ -100,7 +110,7 @@ app.get('/api/songs', (req, res) => {
   });
 });
 
-// Endpoint to stream a song with robust range handling
+// Endpoint to stream a song with robust range handling (no changes here)
 app.get('/api/songs/:songName', (req, res) => {
   const songName = req.params.songName;
   const songPath = path.join(musicDir, songName);
