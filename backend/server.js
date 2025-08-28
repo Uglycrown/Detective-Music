@@ -50,6 +50,11 @@ app.post('/api/download-youtube', async (req, res) => {
     // The wrapper executes `yt-dlp --dump-single-json <url>`
     const metadata = await youtubedl(url, {
       dumpSingleJson: true,
+      userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+      referer: 'https://www.youtube.com/',
+      addHeader: ['Accept-Language:en-US,en;q=0.9'],
+      forceIpv4: true,
+      noCheckCertificates: true,
     });
 
     const title = metadata.title.replace(/[<>:"/\\|?*]/g, ''); // Sanitize filename
@@ -60,6 +65,11 @@ app.post('/api/download-youtube', async (req, res) => {
     const streamProcess = youtubedl.exec(url, {
       format: 'bestaudio', // Get the best audio-only format
       output: '-',         // Output to stdout
+      userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+      referer: 'https://www.youtube.com/',
+      addHeader: ['Accept-Language:en-US,en;q=0.9'],
+      forceIpv4: true,
+      noCheckCertificates: true,
       // Optional: Add cookie file if needed for private/restricted videos
       // cookie: 'path/to/cookies.txt'
     });
