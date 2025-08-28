@@ -55,6 +55,8 @@ app.post('/api/download-youtube', async (req, res) => {
       addHeader: ['Accept-Language:en-US,en;q=0.9'],
       forceIpv4: true,
       noCheckCertificates: true,
+      // Use browser cookies for authentication (most reliable method)
+      cookiesFromBrowser: 'chrome', // Change to 'firefox' if you use Firefox
     });
 
     const title = metadata.title.replace(/[<>:"/\\|?*]/g, ''); // Sanitize filename
@@ -70,8 +72,8 @@ app.post('/api/download-youtube', async (req, res) => {
       addHeader: ['Accept-Language:en-US,en;q=0.9'],
       forceIpv4: true,
       noCheckCertificates: true,
-      // Optional: Add cookie file if needed for private/restricted videos
-      // cookie: 'path/to/cookies.txt'
+      // Use browser cookies for authentication (most reliable method)
+      cookiesFromBrowser: 'chrome', // Change to 'firefox' if you use Firefox
     });
 
     console.log(`Starting download for: ${title}`);
