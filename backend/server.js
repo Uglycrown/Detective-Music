@@ -53,15 +53,10 @@ app.post('/api/download-youtube', async (req, res) => {
       userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36',
       referer: 'https://www.youtube.com/',
       addHeader: [
-        'Accept-Language:en-US,en;q=0.9',
-        'Accept:text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8'
+        'Accept-Language:en-US,en;q=0.9'
       ],
       forceIpv4: true,
       noCheckCertificates: true,
-      // Removed cookiesFromBrowser to avoid path issues in deployment
-      // Added additional options to bypass bot detection
-      extractor: 'youtube',
-      skipDownload: false,
     });
 
     const title = metadata.title.replace(/[<>:"/\\|?*]/g, ''); // Sanitize filename
@@ -75,14 +70,10 @@ app.post('/api/download-youtube', async (req, res) => {
       userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36',
       referer: 'https://www.youtube.com/',
       addHeader: [
-        'Accept-Language:en-US,en;q=0.9',
-        'Accept:text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8'
+        'Accept-Language:en-US,en;q=0.9'
       ],
       forceIpv4: true,
       noCheckCertificates: true,
-      // Removed cookiesFromBrowser to avoid path issues in deployment
-      // Added additional options to bypass bot detection
-      extractor: 'youtube',
     });
 
     console.log(`Starting download for: ${title}`);
