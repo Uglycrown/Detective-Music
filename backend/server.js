@@ -50,13 +50,18 @@ app.post('/api/download-youtube', async (req, res) => {
     // The wrapper executes `yt-dlp --dump-single-json <url>`
     const metadata = await youtubedl(url, {
       dumpSingleJson: true,
-      userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+      userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36',
       referer: 'https://www.youtube.com/',
-      addHeader: ['Accept-Language:en-US,en;q=0.9'],
+      addHeader: [
+        'Accept-Language:en-US,en;q=0.9',
+        'Accept:text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8'
+      ],
       forceIpv4: true,
       noCheckCertificates: true,
-      // Use browser cookies for authentication (most reliable method)
-      cookiesFromBrowser: 'chrome', // Change to 'firefox' if you use Firefox
+      // Removed cookiesFromBrowser to avoid path issues in deployment
+      // Added additional options to bypass bot detection
+      extractor: 'youtube',
+      skipDownload: false,
     });
 
     const title = metadata.title.replace(/[<>:"/\\|?*]/g, ''); // Sanitize filename
@@ -65,15 +70,19 @@ app.post('/api/download-youtube', async (req, res) => {
     // NEW LOGIC: Now, execute a separate process for the download stream
     // This creates a child process that runs `yt-dlp -f bestaudio -o - <url>`
     const streamProcess = youtubedl.exec(url, {
-      format: 'bestaudio', // Get the best audio-only format
+      format: 'bestaudio/best', // Get the best audio format available
       output: '-',         // Output to stdout
-      userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+      userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36',
       referer: 'https://www.youtube.com/',
-      addHeader: ['Accept-Language:en-US,en;q=0.9'],
+      addHeader: [
+        'Accept-Language:en-US,en;q=0.9',
+        'Accept:text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8'
+      ],
       forceIpv4: true,
       noCheckCertificates: true,
-      // Use browser cookies for authentication (most reliable method)
-      cookiesFromBrowser: 'chrome', // Change to 'firefox' if you use Firefox
+      // Removed cookiesFromBrowser to avoid path issues in deployment
+      // Added additional options to bypass bot detection
+      extractor: 'youtube',
     });
 
     console.log(`Starting download for: ${title}`);
