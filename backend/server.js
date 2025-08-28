@@ -3,20 +3,10 @@ const cors = require('cors');
 const fs = require('fs');
 const path = require('path');
 const multer = require('multer');
-const ytdl = require('ytdl-core'); // CHANGED: Replaced play-dl with ytdl-core
+// CHANGED: Replaced ytdl-core with the youtube-dl-exec wrapper
+const youtubedl = require('youtube-dl-exec');
 const rangeParser = require('range-parser');
 
-// NEW: ytdl-core options object for handling authentication
-const ytdlOptions = {};
-if (process.env.YOUTUBE_COOKIE) {
-  ytdlOptions.requestOptions = {
-    headers: {
-      cookie: process.env.YOUTUBE_COOKIE,
-      // User-agent might be needed for some requests to succeed
-      'user-agent': process.env.YOUTUBE_USER_AGENT || 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.101 Safari/537.36',
-    },
-  };
-}
 
 const app = express();
 const port = 3000;
@@ -48,52 +38,60 @@ app.post('/api/upload', upload.single('song'), (req, res) => {
   res.json({ message: 'Song uploaded successfully!' });
 });
 
-// Endpoint to download YouTube video audio - REWRITTEN LOGIC
+// Endpoint to download YouTube video audio - REWRITTEN FOR YT-DLP
 app.post('/api/download-youtube', async (req, res) => {
   const { url } = req.body;
-  // CHANGED: Use ytdl.validateURL for validation
-  if (!url || !ytdl.validateURL(url)) {
-    return res.status(400).json({ error: 'Invalid YouTube URL' });
+  if (!url) {
+    return res.status(400).json({ error: 'URL is required' });
   }
 
   try {
-    // CHANGED: Use ytdl.getInfo to fetch video details
-    const info = await ytdl.getInfo(url, ytdlOptions);
-    // CHANGED: Title is located in a different property
-    const title = info.videoDetails.title.replace(/[<>:"/\\|?*]/g, ''); // Sanitize filename
+    // NEW LOGIC: First, get the video's metadata as JSON
+    // The wrapper executes `yt-dlp --dump-single-json <url>`
+    const metadata = await youtubedl(url, {
+      dumpSingleJson: true,
+    });
+
+    const title = metadata.title.replace(/[<>:"/\\|?*]/g, ''); // Sanitize filename
     const filePath = path.join(musicDir, `${title}.mp3`);
 
-    // CHANGED: The main ytdl function returns a stream directly
-    const stream = ytdl(url, {
-      ...ytdlOptions,
-      filter: 'audioonly',
-      quality: 'highestaudio',
+    // NEW LOGIC: Now, execute a separate process for the download stream
+    // This creates a child process that runs `yt-dlp -f bestaudio -o - <url>`
+    const streamProcess = youtubedl.exec(url, {
+      format: 'bestaudio', // Get the best audio-only format
+      output: '-',         // Output to stdout
+      // Optional: Add cookie file if needed for private/restricted videos
+      // cookie: 'path/to/cookies.txt'
     });
 
+    console.log(`Starting download for: ${title}`);
     const fileStream = fs.createWriteStream(filePath);
 
-    // CHANGED: Attach error handler directly to the stream from ytdl
-    stream.on('error', (err) => {
-      console.error('Error in ytdl readable stream:', err);
-      res.status(500).json({ error: 'Error with the download stream' });
-      fileStream.close();
-    });
+    // Pipe the standard output of the yt-dlp process to the file
+    streamProcess.stdout.pipe(fileStream);
 
-    // CHANGED: Pipe the stream directly
-    stream.pipe(fileStream);
-
-    fileStream.on('finish', () => {
+    // Handle process events
+    streamProcess.on('close', () => {
+      console.log(`Download finished for: ${title}.mp3`);
       res.json({ message: 'Download complete!', filename: `${title}.mp3` });
     });
 
-    fileStream.on('error', (err) => {
-      console.error('Error writing file:', err);
-      res.status(500).json({ error: 'Error saving the file' });
+    streamProcess.on('error', (err) => {
+      console.error('Error in yt-dlp process:', err);
+      res.status(500).json({ error: 'Error during download process' });
+      fileStream.close(); // Ensure file stream is closed on error
     });
 
+    // For debugging, you can log stderr
+    streamProcess.stderr.on('data', data => {
+      console.error(`yt-dlp stderr: ${data}`);
+    });
+
+
   } catch (error) {
-    console.error('Error downloading from YouTube:', error);
-    res.status(500).json({ error: 'Error downloading from YouTube' });
+    console.error('Error fetching metadata from YouTube:', error);
+    // The error from youtubedl often contains useful info in stderr
+    res.status(500).json({ error: 'Error fetching video metadata. The URL might be invalid or private.' });
   }
 });
 
