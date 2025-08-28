@@ -15,7 +15,6 @@
     "cors": "^2.8.5",
     "express": "^5.1.0",
     "multer": "^2.0.2",
-    "play-dl": "^1.9.7",
     "range-parser": "^1.2.1",
     "yt-dlp-wrap": "^2.3.12",
     "ytdl-core": "^4.11.5"
