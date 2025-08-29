@@ -57,8 +57,7 @@ app.post('/api/download-youtube', async (req, res) => {
       ],
       forceIpv4: true,
       noCheckCertificates: true,
-      cookiesFromBrowser: 'chrome',
-      rmCacheDir: true,
+      cookies: path.join(__dirname, 'cookies.txt'),
     });
 
     const title = metadata.title.replace(/[<>:"/\\|?*]/g, ''); // Sanitize filename
@@ -76,8 +75,7 @@ app.post('/api/download-youtube', async (req, res) => {
       ],
       forceIpv4: true,
       noCheckCertificates: true,
-      cookiesFromBrowser: 'chrome',
-      rmCacheDir: true,
+      cookies: path.join(__dirname, 'cookies.txt'),
     });
 
     console.log(`Starting download for: ${title}`);
