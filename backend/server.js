@@ -11,7 +11,7 @@ const rangeParser = require('range-parser');
 const app = express();
 const port = process.env.PORT || 3000;
 
-app.use(cors());
+app.use(cors({ origin: 'https://detective-gen-z-music.vercel.app' }));
 app.use(express.json());
 
 const musicDir = path.join(__dirname, 'music');
