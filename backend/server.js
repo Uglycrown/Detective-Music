@@ -14,7 +14,7 @@ const port = process.env.PORT || 3000;
 app.use(cors({ origin: 'https://detective-gen-z-music.vercel.app' }));
 app.use(express.json());
 
-const musicDir = path.join(__dirname, 'music');
+const musicDir = process.env.MUSIC_DIR || path.join(__dirname, 'music');
 
 // Ensure music directory exists
 if (!fs.existsSync(musicDir)){
