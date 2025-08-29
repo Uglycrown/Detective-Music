@@ -1,4 +1,5 @@
 <script setup>
+import { ref, onMounted, computed } from 'vue';
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://detective-music-production.up.railway.app';
 
 const songs = ref([]);
