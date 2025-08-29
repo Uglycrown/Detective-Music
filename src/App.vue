@@ -239,7 +239,7 @@ const showNotification = (message, type = 'success') => {
       <!-- Main Section -->
       <div class="content-area">
         <div class="welcome-section">
-          <h2>Good evening</h2>
+          <h2>Welcome back Detective (Gen-Z)</h2>
           <div class="quick-picks">
             <div class="quick-pick-item" v-for="(song, index) in songs.slice(0, 6)" :key="song" @click="playSong(song)">
               <div class="quick-pick-cover">🎵</div>
