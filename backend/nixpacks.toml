@@ -1,0 +1,9 @@
+# nixpacks.toml
+
+[phases.setup]
+# Add python3 to the environment
+nixPkgs = ["...", "python3"]
+
+[start]
+# Use the default start command from package.json
+command = "npm start"
