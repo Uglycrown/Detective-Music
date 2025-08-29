@@ -16,7 +16,6 @@
     "express": "^5.1.0",
     "multer": "^2.0.2",
     "range-parser": "^1.2.1",
-    "youtube-dl-exec": "^3.0.24",
-    "yt-dlp-wrap": "^2.3.12"
+    "youtube-dl-exec": "^3.0.24"
   }
 }
