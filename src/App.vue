@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, computed } from 'vue';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://detective-music-production.up.railway.app';
 
 const songs = ref([]);
 const currentSong = ref(null);
@@ -15,7 +15,7 @@ const showUploadModal = ref(false);
 
 const fetchSongs = async () => {
   try {
-    const response = await fetch('https://detective-music.onrender.com/api/songs');
+    const response = await fetch(`${API_BASE_URL}/api/songs`);
     if (response.ok) {
       const data = await response.json();
       songs.value = data;
@@ -53,7 +53,7 @@ const updateDuration = () => {
 const playSong = (song) => {
   currentSong.value = song;
   if (audioPlayer.value) {
-    audioPlayer.value.src = `https://detective-music.onrender.com/api/songs/${song}`;
+    audioPlayer.value.src = `${API_BASE_URL}/api/songs/${song}`;
     audioPlayer.value.play();
   }
 };
@@ -138,7 +138,7 @@ const handleFileUpload = async () => {
   formData.append('song', file);
 
   try {
-    const response = await fetch('https://detective-music.onrender.com/api/upload', {
+    const response = await fetch(`${API_BASE_URL}/api/upload`, {
       method: 'POST',
       body: formData,
     });
@@ -160,7 +160,7 @@ const handleYoutubeDownload = async () => {
   if (!youtubeUrl.value) return;
 
   try {
-    const response = await fetch('https://detective-music.onrender.com/api/download-youtube', {
+    const response = await fetch(`${API_BASE_URL}/api/download-youtube`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
