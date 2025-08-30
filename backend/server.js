@@ -11,7 +11,17 @@ const rangeParser = require('range-parser');
 const app = express();
 const port = process.env.PORT || 3000;
 
-app.use(cors({ origin: 'https://detective-gen-z-music.vercel.app' }));
+const allowedOrigins = ['https://detective-gen-z-music.vercel.app', 'http://localhost:5173'];
+
+app.use(cors({
+  origin: function (origin, callback) {
+    if (allowedOrigins.indexOf(origin) !== -1 || !origin) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  }
+}));
 app.use(express.json());
 
 const musicDir = process.env.MUSIC_DIR || path.join(__dirname, 'music');

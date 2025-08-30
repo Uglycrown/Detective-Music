@@ -1,18 +1,19 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue';
+import 'vidstack/player/styles/default/theme.css';
+import 'vidstack/player/styles/default/layouts/video.css';
+import 'vidstack/player';
+import 'vidstack/player/ui';
+
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://detective-music-production.up.railway.app';
 
 const songs = ref([]);
 const currentSong = ref(null);
-const audioPlayer = ref(null);
 const fileInput = ref(null);
 const youtubeUrl = ref('');
-const isPlaying = ref(false);
-const currentTime = ref(0);
-const duration = ref(0);
-const volume = ref(0.7);
 const sidebarOpen = ref(false);
 const showUploadModal = ref(false);
+const player = ref(null);
 
 const fetchSongs = async () => {
   try {
@@ -30,42 +31,18 @@ const fetchSongs = async () => {
 
 onMounted(() => {
   fetchSongs();
-  // Initialize audio event listeners
-  if (audioPlayer.value) {
-    audioPlayer.value.addEventListener('timeupdate', updateTime);
-    audioPlayer.value.addEventListener('loadedmetadata', updateDuration);
-    audioPlayer.value.addEventListener('play', () => isPlaying.value = true);
-    audioPlayer.value.addEventListener('pause', () => isPlaying.value = false);
-  }
 });
-
-const updateTime = () => {
-  if (audioPlayer.value) {
-    currentTime.value = audioPlayer.value.currentTime;
-  }
-};
-
-const updateDuration = () => {
-  if (audioPlayer.value) {
-    duration.value = audioPlayer.value.duration;
-  }
-};
 
 const playSong = (song) => {
   currentSong.value = song;
-  if (audioPlayer.value) {
-    audioPlayer.value.src = `${API_BASE_URL}/api/songs/${song}`;
-    audioPlayer.value.play();
-  }
-};
-
-const togglePlay = () => {
-  if (audioPlayer.value) {
-    if (isPlaying.value) {
-      audioPlayer.value.pause();
-    } else {
-      audioPlayer.value.play();
-    }
+  const src = `${API_BASE_URL}/api/songs/${song}`;
+  if (player.value) {
+    player.value.src = {
+      src: src,
+      type: 'audio/mpeg'
+    };
+    player.value.title = song.replace('.mp3', '');
+    player.value.play();
   }
 };
 
@@ -98,36 +75,6 @@ const playPreviousSong = () => {
   const previousSong = getPreviousSong();
   if (previousSong) {
     playSong(previousSong);
-  }
-};
-
-const formatTime = (seconds) => {
-  if (isNaN(seconds)) return '0:00';
-  const mins = Math.floor(seconds / 60);
-  const secs = Math.floor(seconds % 60);
-  return `${mins}:${secs.toString().padStart(2, '0')}`;
-};
-
-const progressPercentage = computed(() => {
-  if (duration.value === 0) return 0;
-  return (currentTime.value / duration.value) * 100;
-});
-
-const setProgress = (event) => {
-  if (audioPlayer.value && duration.value) {
-    const rect = event.currentTarget.getBoundingClientRect();
-    const percent = (event.clientX - rect.left) / rect.width;
-    const newTime = percent * duration.value;
-    audioPlayer.value.currentTime = newTime;
-  }
-};
-
-const setVolume = (event) => {
-  const rect = event.currentTarget.getBoundingClientRect();
-  const percent = (event.clientX - rect.left) / rect.width;
-  volume.value = Math.max(0, Math.min(1, percent));
-  if (audioPlayer.value) {
-    audioPlayer.value.volume = volume.value;
   }
 };
 
@@ -254,8 +201,7 @@ const showNotification = (message, type = 'success') => {
             <div v-for="song in songs" :key="song" class="track-card" :class="{ 'track-active': currentSong === song }"
               @click="playSong(song)">
               <div class="track-cover">
-                <div class="play-button" v-if="currentSong !== song || !isPlaying">▶️</div>
-                <div class="pause-button" v-else>⏸️</div>
+                <div class="play-button">▶️</div>
                 <div class="track-placeholder">🎵</div>
               </div>
               <div class="track-info">
@@ -269,7 +215,8 @@ const showNotification = (message, type = 'success') => {
     </main>
 
     <!-- Now Playing Bar -->
-    <div class="now-playing-bar" v-if="currentSong">
+    <media-player class="now-playing-bar" v-if="currentSong" ref="player" @ended="playNextSong">
+      <media-outlet />
       <div class="now-playing-track">
         <div class="track-cover-small">🎵</div>
         <div class="track-details">
@@ -280,29 +227,25 @@ const showNotification = (message, type = 'success') => {
 
       <div class="player-controls">
         <div class="control-buttons">
-          <button class="control-btn" @click="playPreviousSong">⏮️</button>
-          <button class="play-btn" @click="togglePlay">
-            {{ isPlaying ? '⏸️' : '▶️' }}
-          </button>
-          <button class="control-btn" @click="playNextSong">⏭️</button>
+            <media-seek-backward-button :seek-offset=10 class="control-btn">⏮️</media-seek-backward-button>
+            <media-play-button class="play-btn">
+                <span slot="play">▶️</span>
+                <span slot="pause">⏸️</span>
+            </media-play-button>
+            <media-seek-forward-button :seek-offset=10 class="control-btn">⏭️</media-seek-forward-button>
         </div>
 
         <div class="progress-container">
-          <span class="time-display">{{ formatTime(currentTime) }}</span>
-          <div class="progress-bar" @click="setProgress">
-            <div class="progress-fill" :style="{ width: progressPercentage + '%' }"></div>
-          </div>
-          <span class="time-display">{{ formatTime(duration) }}</span>
+          <media-time type="current" class="time-display" />
+          <media-time-slider class="progress-bar" />
+          <media-time type="duration" class="time-display" />
         </div>
       </div>
 
       <div class="volume-controls">
-        <span class="volume-icon">🔊</span>
-        <div class="volume-bar" @click="setVolume">
-          <div class="volume-fill" :style="{ width: (volume * 100) + '%' }"></div>
-        </div>
+        <media-volume-slider class="volume-bar" />
       </div>
-    </div>
+    </media-player>
 
     <!-- Upload Modal -->
     <div class="modal-overlay" v-if="showUploadModal" @click="showUploadModal = false">
@@ -336,10 +279,6 @@ const showNotification = (message, type = 'success') => {
         </div>
       </div>
     </div>
-
-    <!-- Hidden Audio Player -->
-    <audio ref="audioPlayer" @ended="playNextSong" @timeupdate="updateTime" @loadedmetadata="updateDuration"
-      @play="isPlaying = true" @pause="isPlaying = false" style="display: none;"></audio>
   </div>
 </template>
 
