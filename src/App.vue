@@ -227,12 +227,12 @@ const showNotification = (message, type = 'success') => {
 
       <div class="player-controls">
         <div class="control-buttons">
-            <media-seek-backward-button :seek-offset=10 class="control-btn">⏮️</media-seek-backward-button>
-            <media-play-button class="play-btn">
-                <span slot="play">▶️</span>
-                <span slot="pause">⏸️</span>
-            </media-play-button>
-            <media-seek-forward-button :seek-offset=10 class="control-btn">⏭️</media-seek-forward-button>
+          <media-seek-backward-button :seek-offset=10 class="control-btn">⏮️</media-seek-backward-button>
+          <media-play-button class="play-btn">
+            <span slot="play">▶️</span>
+            <span slot="pause">⏸️</span>
+          </media-play-button>
+          <media-seek-forward-button :seek-offset=10 class="control-btn">⏭️</media-seek-forward-button>
         </div>
 
         <div class="progress-container">
@@ -261,7 +261,7 @@ const showNotification = (message, type = 'success') => {
             <div class="file-upload-area">
               <input type="file" ref="fileInput" accept=".mp3" id="file-input" hidden />
               <label for="file-input" class="file-upload-btn">
-                📁 Choose MP3 File
+                📁 Choose MP3 File 1
               </label>
               <button class="upload-btn" @click="handleFileUpload">Upload</button>
             </div>
