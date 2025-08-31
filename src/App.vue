@@ -1,6 +1,7 @@
 <script setup>
 import { ref, onMounted, computed, nextTick } from 'vue';
 import CustomAudioPlayer from './components/CustomAudioPlayer.vue';
+import ConfirmationModal from './components/ConfirmationModal.vue';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://detective-music-production.up.railway.app';
 
@@ -12,6 +13,8 @@ const sidebarOpen = ref(false);
 const showUploadModal = ref(false);
 const player = ref(null);
 const songProgress = ref({});
+const showDeleteModal = ref(false);
+const songToDelete = ref(null);
 
 const fetchSongs = async () => {
   try {
@@ -144,37 +147,48 @@ const getSongProgress = (song) => {
   return (progress.currentTime / progress.duration) * 100;
 };
 
-const deleteSong = async (song) => {
-  if (confirm(`Are you sure you want to delete ${song}?`)) {
-    try {
-      const response = await fetch(`${API_BASE_URL}/api/songs?filename=${encodeURIComponent(song)}`, {
-        method: 'DELETE',
-      });
+const deleteSong = (song) => {
+  songToDelete.value = song;
+  showDeleteModal.value = true;
+};
 
-      if (response.ok) {
-        showNotification(`Song "${song}" deleted successfully!`);
-        fetchSongs(); // Refresh the song list
+const handleDeleteConfirm = async () => {
+  if (!songToDelete.value) return;
 
-        // Remove from local progress storage
-        const progress = songProgress.value;
-        delete progress[song];
-        songProgress.value = { ...progress }; // Trigger reactivity
-        localStorage.setItem('song_progress', JSON.stringify(progress));
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/songs?filename=${encodeURIComponent(songToDelete.value)}`, {
+      method: 'DELETE',
+    });
 
-        // If the deleted song was the current one, stop playback
-        if (currentSong.value === song) {
-          currentSong.value = null;
-        }
+    if (response.ok) {
+      // No more alert/notification
+      fetchSongs(); // Refresh the song list
 
-      } else {
-        const data = await response.json();
-        showNotification(`Failed to delete song: ${data.error}`, 'error');
+      const progress = songProgress.value;
+      delete progress[songToDelete.value];
+      songProgress.value = { ...progress };
+      localStorage.setItem('song_progress', JSON.stringify(progress));
+
+      if (currentSong.value === songToDelete.value) {
+        currentSong.value = null;
       }
-    } catch (error) {
-      console.error('Error deleting song:', error);
-      showNotification('Error deleting song', 'error');
+    } else {
+      const data = await response.json();
+      showNotification(`Failed to delete song: ${data.error}`, 'error'); // Keep error notifications
     }
+  } catch (error) {
+    console.error('Error deleting song:', error);
+    showNotification('Error deleting song', 'error');
+  } finally {
+    // Hide the modal and reset the song to delete
+    showDeleteModal.value = false;
+    songToDelete.value = null;
   }
+};
+
+const handleDeleteCancel = () => {
+  showDeleteModal.value = false;
+  songToDelete.value = null;
 };
 
 </script>
@@ -230,9 +244,20 @@ const deleteSong = async (song) => {
         <div class="welcome-section">
           <h2>Welcome back Detective (Gen-Z)</h2>
           <div class="quick-picks">
-            <div class="quick-pick-item" v-for="(song, index) in songs.slice(0, 6)" :key="song" @click="playSong(song)">
-              <div class="quick-pick-cover" @click.stop="playSong(song)">🎵</div>
-              <div class="quick-pick-details" @click.stop="playSong(song)">
+            <div 
+              class="quick-pick-item" 
+              v-for="(song, index) in songs.slice(0, 6)" 
+              :key="song" 
+              @click="playSong(song)"
+              :class="{ 'quick-pick-active': currentSong === song }"
+            >
+              <div class="quick-pick-cover">
+                <div class="cover-play-button">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                </div>
+                🎵
+              </div>
+              <div class="quick-pick-details">
                 <span class="quick-pick-title">{{ song.replace('.mp3', '') }}</span>
                 <div class="song-progress-bar-container">
                   <div class="song-progress-bar" :style="{ width: getSongProgress(song) + '%' }"></div>
@@ -299,6 +324,15 @@ const deleteSong = async (song) => {
         </div>
       </div>
     </div>
+
+    <!-- Delete Confirmation Modal -->
+    <ConfirmationModal
+      :isOpen="showDeleteModal"
+      title="Delete Song"
+      :message="`Are you sure you want to delete '${songToDelete}'?`"
+      @confirm="handleDeleteConfirm"
+      @cancel="handleDeleteCancel"
+    />
   </div>
 </template>
 
@@ -573,6 +607,15 @@ const deleteSong = async (song) => {
   border-color: rgba(29, 185, 84, 0.3);
 }
 
+.quick-pick-active {
+  background: rgba(29, 185, 84, 0.3);
+  border-color: #1db954;
+}
+
+.quick-pick-active .quick-pick-title {
+  color: #1db954;
+}
+
 .quick-pick-cover {
   width: 50px;
   height: 50px;
@@ -582,6 +625,29 @@ const deleteSong = async (song) => {
   align-items: center;
   justify-content: center;
   font-size: 20px;
+  position: relative; /* For positioning the play button */
+}
+
+.cover-play-button {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.8);
+  width: 40px;
+  height: 40px;
+  background: rgba(29, 185, 84, 0.8);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  opacity: 0;
+  transition: all 0.2s ease;
+}
+
+.quick-pick-item:hover .cover-play-button {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
 }
 
 .quick-pick-details {
