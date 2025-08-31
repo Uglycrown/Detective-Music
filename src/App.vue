@@ -897,6 +897,7 @@ const truncate = (text, length) => {
     position: sticky;
     top: 0;
     z-index: 10;
+    margin-top: 20px;
   }
 
   .search-container {
