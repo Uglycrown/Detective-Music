@@ -165,6 +165,7 @@ const updateSongProgress = (data) => {
 
 const getSongProgress = (song) => {
   const progress = songProgress.value[song];
+  console.log('progress', progress);
   if (!progress || !progress.duration) return 0;
   return (progress.currentTime / progress.duration) * 100;
 };
@@ -257,7 +258,7 @@ const truncate = (text, length) => {
     <!-- Main Content -->
     <main class="main-content">
       <!-- Header -->
-      <header class="top-bar">
+      <header class.top-bar">
         <button class="menu-toggle" @click="sidebarOpen = !sidebarOpen">☰</button>
         <div class="search-container">
           <input type="text" placeholder="Search for artists, songs, or podcasts" class="search-input">
