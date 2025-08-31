@@ -287,8 +287,8 @@ defineExpose({ play });
 }
 
 .play-btn {
-  width: 42px;
-  height: 42px;
+  width: 50px;
+  height: 50px;
   background: white;
   color: black;
   border-radius: 50%;
