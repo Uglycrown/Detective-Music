@@ -19,56 +19,113 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue';
+import { ref, watch, defineExpose, onUnmounted } from 'vue';
 
 const props = defineProps({
   src: String,
-  autoPlay: {
-    type: Boolean,
-    default: false,
+  songId: String, // Expecting the song filename as an ID
+  startTime: {
+    type: Number,
+    default: 0,
   },
 });
 
-const emit = defineEmits(['ended', 'next', 'previous']);
+const emit = defineEmits(['ended', 'next', 'previous', 'progress']);
 
 const audioPlayer = ref(null);
 const isPlaying = ref(false);
-const currentTime = ref(0);
+const currentTime = ref(props.startTime);
 const duration = ref(0);
 const volume = ref(0.5);
+const lastSaveTime = ref(0);
+
+// --- Progress Management ---
+
+const getProgress = () => {
+  const progress = localStorage.getItem('song_progress');
+  return progress ? JSON.parse(progress) : {};
+};
+
+const saveProgress = (time, dur) => {
+  const allProgress = getProgress();
+  if (!props.songId) return;
+  allProgress[props.songId] = {
+    currentTime: time,
+    duration: dur,
+  };
+  localStorage.setItem('song_progress', JSON.stringify(allProgress));
+  emit('progress', { songId: props.songId, currentTime: time, duration: dur });
+};
+
+// --- Lifecycle and Event Handlers ---
 
 watch(() => props.src, (newSrc) => {
   if (newSrc && audioPlayer.value) {
     audioPlayer.value.load();
-    if (props.autoPlay) {
-      const playPromise = audioPlayer.value.play();
-      if (playPromise !== undefined) {
-        playPromise.then(() => {
-          isPlaying.value = true;
-        }).catch(error => {
-          console.error("Autoplay was prevented:", error);
-          isPlaying.value = false;
-        });
-      }
+    const allProgress = getProgress();
+    const songProgress = allProgress[props.songId];
+    if (songProgress) {
+      audioPlayer.value.currentTime = songProgress.currentTime;
+      currentTime.value = songProgress.currentTime;
     }
   }
 });
 
 const onTimeUpdate = () => {
-  if (audioPlayer.value) {
-    currentTime.value = audioPlayer.value.currentTime;
+  if (!audioPlayer.value) return;
+  const now = Date.now();
+  currentTime.value = audioPlayer.value.currentTime;
+
+  // Throttle saving progress to every 5 seconds
+  if (now - lastSaveTime.value > 5000) {
+    saveProgress(currentTime.value, duration.value);
+    lastSaveTime.value = now;
   }
 };
 
 const onLoadedMetadata = () => {
-  if (audioPlayer.value) {
-    duration.value = audioPlayer.value.duration;
-  }
+  if (!audioPlayer.value) return;
+  duration.value = audioPlayer.value.duration;
+  
+  // Restore progress when metadata is loaded
+  const allProgress = getProgress();
+  const songProgress = allProgress[props.songId];
+  const startAt = songProgress ? songProgress.currentTime : props.startTime;
+  
+  audioPlayer.value.currentTime = startAt;
+  currentTime.value = startAt;
+
+  // Save initial duration
+  saveProgress(startAt, duration.value);
 };
 
 const onEnded = () => {
   isPlaying.value = false;
+  saveProgress(0, duration.value); // Reset progress on end
   emit('ended');
+};
+
+onUnmounted(() => {
+  if (audioPlayer.value) {
+    saveProgress(audioPlayer.value.currentTime, duration.value);
+  }
+});
+
+
+// --- Playback Controls ---
+
+const play = () => {
+  if (!audioPlayer.value) return;
+
+  const playPromise = audioPlayer.value.play();
+  if (playPromise !== undefined) {
+    playPromise.then(() => {
+      isPlaying.value = true;
+    }).catch(error => {
+      console.error("Play was prevented:", error);
+      isPlaying.value = false;
+    });
+  }
 };
 
 const togglePlay = () => {
@@ -78,15 +135,7 @@ const togglePlay = () => {
     audioPlayer.value.pause();
     isPlaying.value = false;
   } else {
-    const playPromise = audioPlayer.value.play();
-    if (playPromise !== undefined) {
-      playPromise.then(() => {
-        isPlaying.value = true;
-      }).catch(error => {
-        console.error("Play was prevented:", error);
-        isPlaying.value = false;
-      });
-    }
+    play();
   }
 };
 
@@ -100,7 +149,7 @@ const playPrev = () => {
 
 const seek = (event) => {
   if (audioPlayer.value) {
-    const time = event.target.value;
+    const time = parseFloat(event.target.value);
     audioPlayer.value.currentTime = time;
     currentTime.value = time;
   }
@@ -117,6 +166,10 @@ const formatTime = (timeInSeconds) => {
   const seconds = Math.floor(timeInSeconds % 60).toString().padStart(2, '0');
   return `${minutes}:${seconds}`;
 };
+
+defineExpose({
+  play,
+});
 </script>
 
 <style scoped>

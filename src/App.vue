@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted, computed, nextTick } from 'vue';
 import CustomAudioPlayer from './components/CustomAudioPlayer.vue';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://detective-music-production.up.railway.app';
@@ -10,6 +10,8 @@ const fileInput = ref(null);
 const youtubeUrl = ref('');
 const sidebarOpen = ref(false);
 const showUploadModal = ref(false);
+const player = ref(null);
+const songProgress = ref({});
 
 const fetchSongs = async () => {
   try {
@@ -27,10 +29,17 @@ const fetchSongs = async () => {
 
 onMounted(() => {
   fetchSongs();
+  const savedProgress = localStorage.getItem('song_progress');
+  if (savedProgress) {
+    songProgress.value = JSON.parse(savedProgress);
+  }
 });
 
 const playSong = (song) => {
   currentSong.value = song;
+  nextTick(() => {
+    player.value?.play();
+  });
 };
 
 const getNextSong = () => {
@@ -122,6 +131,19 @@ const showNotification = (message, type = 'success') => {
   alert(message);
 };
 
+const updateSongProgress = (data) => {
+  songProgress.value[data.songId] = {
+    currentTime: data.currentTime,
+    duration: data.duration,
+  };
+};
+
+const getSongProgress = (song) => {
+  const progress = songProgress.value[song];
+  if (!progress || !progress.duration) return 0;
+  return (progress.currentTime / progress.duration) * 100;
+};
+
 </script>
 
 <template>
@@ -177,27 +199,17 @@ const showNotification = (message, type = 'success') => {
           <div class="quick-picks">
             <div class="quick-pick-item" v-for="(song, index) in songs.slice(0, 6)" :key="song" @click="playSong(song)">
               <div class="quick-pick-cover">🎵</div>
-              <span class="quick-pick-title">{{ song.replace('.mp3', '') }}</span>
+              <div class="quick-pick-details">
+                <span class="quick-pick-title">{{ song.replace('.mp3', '') }}</span>
+                <div class="song-progress-bar-container">
+                  <div class="song-progress-bar" :style="{ width: getSongProgress(song) + '%' }"></div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
 
-        <div class="made-for-you">
-          <h2>Made for You</h2>
-          <div class="track-grid">
-            <div v-for="song in songs" :key="song" class="track-card" :class="{ 'track-active': currentSong === song }"
-              @click="playSong(song)">
-              <div class="track-cover">
-                <div class="play-button">▶️</div>
-                <div class="track-placeholder">🎵</div>
-              </div>
-              <div class="track-info">
-                <h4 class="track-title">{{ song.replace('.mp3', '') }}</h4>
-                <p class="track-artist">Unknown Artist</p>
-              </div>
-            </div>
-          </div>
-        </div>
+        
       </div>
     </main>
 
@@ -211,11 +223,13 @@ const showNotification = (message, type = 'success') => {
         </div>
       </div>
       <CustomAudioPlayer
+        ref="player"
         :src="`${API_BASE_URL}/api/songs/${currentSong}`"
-        :autoPlay="true"
+        :songId="currentSong"
         @ended="playNextSong"
         @next="playNextSong"
         @previous="playPreviousSong"
+        @progress="updateSongProgress"
       />
     </div>
 
@@ -536,11 +550,17 @@ const showNotification = (message, type = 'success') => {
   font-size: 20px;
 }
 
+.quick-pick-details {
+  flex: 1;
+  min-width: 0;
+}
+
 .quick-pick-title {
   font-weight: 600;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  display: block;
 }
 
 .made-for-you h2 {
@@ -662,6 +682,21 @@ const showNotification = (message, type = 'success') => {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.song-progress-bar-container {
+  height: 4px;
+  background-color: rgba(255, 255, 255, 0.3);
+  border-radius: 2px;
+  margin-top: 8px;
+  overflow: hidden;
+}
+
+.song-progress-bar {
+  height: 100%;
+  background-color: #1db954;
+  border-radius: 2px;
+  transition: width 0.2s ease;
 }
 
 /* Now Playing Bar */
