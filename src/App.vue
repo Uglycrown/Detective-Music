@@ -990,6 +990,7 @@ const truncate = (text, length) => {
     bottom: 0;
     left: 0;
     right: 0;
+    z-index: 1001;
   }
 
   .now-playing-track {
@@ -1110,6 +1111,7 @@ const truncate = (text, length) => {
     padding: 10px 1px;
     background: rgba(0, 0, 0, 0.98);
     backdrop-filter: blur(25px);
+    z-index: 1001;
   }
 
   .track-cover-small {
