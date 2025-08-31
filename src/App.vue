@@ -883,7 +883,6 @@ const truncate = (text, length) => {
 
   /* Enhanced Main Content Mobile Styles */
   .main-content {
-    background: linear-gradient(135deg, rgba(30, 60, 114, 0.9) 0%, rgba(42, 82, 152, 0.9) 100%);
     min-height: 100vh;
   }
 
@@ -912,6 +911,8 @@ const truncate = (text, length) => {
     padding: 20px 16px;
     padding-bottom: 100px;
     /* Extra space for now playing bar */
+    padding-top: 80px;
+    /* Add space for the sticky top bar */
   }
 
   .welcome-section {
@@ -1030,6 +1031,7 @@ const truncate = (text, length) => {
   .content-area {
     padding: 16px 12px;
     padding-bottom: 110px;
+    padding-top: 80px;
   }
 
   .welcome-section h2 {
