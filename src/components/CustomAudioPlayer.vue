@@ -371,7 +371,7 @@ defineExpose({ play });
   display: flex;
   align-items: center;
   gap: 2px;
-  width: 55px;
+  width: 63px;
   flex-shrink: 0;
   /* Prevent shrinking */
 }
