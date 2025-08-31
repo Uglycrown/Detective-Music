@@ -39,15 +39,17 @@ const volume = ref(0.5);
 
 watch(() => props.src, (newSrc) => {
   if (newSrc && audioPlayer.value) {
+    audioPlayer.value.load();
     if (props.autoPlay) {
-      // The `play` method returns a promise.
-      // It might be rejected by the browser if the user hasn't interacted with the page yet.
-      audioPlayer.value.play().then(() => {
-        isPlaying.value = true;
-      }).catch(error => {
-        console.error("Autoplay was prevented:", error);
-        isPlaying.value = false;
-      });
+      const playPromise = audioPlayer.value.play();
+      if (playPromise !== undefined) {
+        playPromise.then(() => {
+          isPlaying.value = true;
+        }).catch(error => {
+          console.error("Autoplay was prevented:", error);
+          isPlaying.value = false;
+        });
+      }
     }
   }
 });
@@ -70,13 +72,21 @@ const onEnded = () => {
 };
 
 const togglePlay = () => {
-  if (audioPlayer.value) {
-    if (isPlaying.value) {
-      audioPlayer.value.pause();
-    } else {
-      audioPlayer.value.play();
+  if (!audioPlayer.value) return;
+
+  if (isPlaying.value) {
+    audioPlayer.value.pause();
+    isPlaying.value = false;
+  } else {
+    const playPromise = audioPlayer.value.play();
+    if (playPromise !== undefined) {
+      playPromise.then(() => {
+        isPlaying.value = true;
+      }).catch(error => {
+        console.error("Play was prevented:", error);
+        isPlaying.value = false;
+      });
     }
-    isPlaying.value = !isPlaying.value;
   }
 };
 
