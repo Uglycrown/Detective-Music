@@ -1,9 +1,6 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue';
-import 'vidstack/player/styles/default/theme.css';
-import 'vidstack/player/styles/default/layouts/video.css';
-import 'vidstack/player';
-import 'vidstack/player/ui';
+import CustomAudioPlayer from './components/CustomAudioPlayer.vue';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://detective-music-production.up.railway.app';
 
@@ -13,7 +10,6 @@ const fileInput = ref(null);
 const youtubeUrl = ref('');
 const sidebarOpen = ref(false);
 const showUploadModal = ref(false);
-const player = ref(null);
 
 const fetchSongs = async () => {
   try {
@@ -35,15 +31,6 @@ onMounted(() => {
 
 const playSong = (song) => {
   currentSong.value = song;
-  const src = `${API_BASE_URL}/api/songs/${song}`;
-  if (player.value) {
-    player.value.src = {
-      src: src,
-      type: 'audio/mpeg'
-    };
-    player.value.title = song.replace('.mp3', '');
-    player.value.play();
-  }
 };
 
 const getNextSong = () => {
@@ -215,8 +202,7 @@ const showNotification = (message, type = 'success') => {
     </main>
 
     <!-- Now Playing Bar -->
-    <media-player class="now-playing-bar" v-if="currentSong" ref="player" @ended="playNextSong">
-      <media-outlet />
+    <div class="now-playing-bar" v-if="currentSong">
       <div class="now-playing-track">
         <div class="track-cover-small">🎵</div>
         <div class="track-details">
@@ -224,28 +210,14 @@ const showNotification = (message, type = 'success') => {
           <div class="artist-name">Unknown Artist</div>
         </div>
       </div>
-
-      <div class="player-controls">
-        <div class="control-buttons">
-          <media-seek-backward-button :seek-offset=10 class="control-btn">⏮️</media-seek-backward-button>
-          <media-play-button class="play-btn">
-            <span slot="play">▶️</span>
-            <span slot="pause">⏸️</span>
-          </media-play-button>
-          <media-seek-forward-button :seek-offset=10 class="control-btn">⏭️</media-seek-forward-button>
-        </div>
-
-        <div class="progress-container">
-          <media-time type="current" class="time-display" />
-          <media-time-slider class="progress-bar" />
-          <media-time type="duration" class="time-display" />
-        </div>
-      </div>
-
-      <div class="volume-controls">
-        <media-volume-slider class="volume-bar" />
-      </div>
-    </media-player>
+      <CustomAudioPlayer
+        :src="`${API_BASE_URL}/api/songs/${currentSong}`"
+        :autoPlay="true"
+        @ended="playNextSong"
+        @next="playNextSong"
+        @previous="playPreviousSong"
+      />
+    </div>
 
     <!-- Upload Modal -->
     <div class="modal-overlay" v-if="showUploadModal" @click="showUploadModal = false">
