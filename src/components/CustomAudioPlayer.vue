@@ -1,6 +1,7 @@
 <template>
   <div class="player-wrapper">
-    <audio ref="audioPlayer" :src="src" @timeupdate="onTimeUpdate" @loadedmetadata="onLoadedMetadata" @ended="onEnded"></audio>
+    <audio ref="audioPlayer" :src="src" @timeupdate="onTimeUpdate" @loadedmetadata="onLoadedMetadata"
+      @ended="onEnded"></audio>
 
     <!-- Row 1: Song Title -->
     <div class="song-info">
@@ -12,53 +13,55 @@
       <div class="progress-container">
         <span class="time-display">{{ formatTime(currentTime) }}</span>
         <div class="progress-bar-wrapper">
-          <input
-            type="range"
-            :value="currentTime"
-            :max="duration || 100"
-            @input="seek"
-            class="progress-bar"
-            :style="progressStyle"
-          />
+          <input type="range" :value="currentTime" :max="duration || 100" @input="seek" class="progress-bar"
+            :style="progressStyle" />
         </div>
         <span class="time-display">{{ formatTime(duration) }}</span>
       </div>
       <div class="volume-controls">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" class="volume-icon"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" class="volume-icon">
+          <path
+            d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z" />
+        </svg>
         <div class="progress-bar-wrapper">
-          <input
-            type="range"
-            min="0"
-            max="1"
-            step="0.01"
-            v-model="volume"
-            @input="setVolume"
-            class="progress-bar"
-            :style="volumeStyle"
-          />
+          <input type="range" min="0" max="1" step="0.01" v-model="volume" @input="setVolume" class="progress-bar"
+            :style="volumeStyle" />
         </div>
       </div>
     </div>
 
     <!-- Row 3: Controls -->
     <div class="player-controls">
-      <button @click="$emit('shuffle')" class="control-btn shuffle-btn" :class="{active: shuffleActive}">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M10.59 9.17L5.41 4 4 5.41l5.17 5.17 1.42-1.41zM14.5 4l2.04 2.04L4 18.59 5.41 20 17.96 7.46 20 9.5V4h-5.5zm.33 9.41l-1.41 1.41 3.13 3.13L14.5 20H20v-5.5l-2.04 2.04-3.13-3.13z"/></svg>
+      <button @click="$emit('shuffle')" class="control-btn shuffle-btn" :class="{ active: shuffleActive }">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+          <path
+            d="M10.59 9.17L5.41 4 4 5.41l5.17 5.17 1.42-1.41zM14.5 4l2.04 2.04L4 18.59 5.41 20 17.96 7.46 20 9.5V4h-5.5zm.33 9.41l-1.41 1.41 3.13 3.13L14.5 20H20v-5.5l-2.04 2.04-3.13-3.13z" />
+        </svg>
       </button>
       <div class="main-controls">
         <button @click="playPrev" class="control-btn">
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6 8.5 6V6z"/></svg>
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M6 6h2v12H6zm3.5 6 8.5 6V6z" />
+          </svg>
         </button>
         <button @click="togglePlay" class="play-btn">
-          <svg v-if="!isPlaying" width="32" height="32" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
-          <svg v-else width="32" height="32" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+          <svg v-if="!isPlaying" width="32" height="32" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M8 5v14l11-7z" />
+          </svg>
+          <svg v-else width="32" height="32" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
+          </svg>
         </button>
         <button @click="playNext" class="control-btn">
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M16 6h2v12h-2zm-4.5 6-8.5 6V6z"/></svg>
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M16 6h2v12h-2zm-4.5 6-8.5 6V6z" />
+          </svg>
         </button>
       </div>
       <button class="control-btn">
-         <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M7 7h10v3l4-4-4-4v3H5v6h2V7zm10 10H7v-3l-4 4 4 4v-3h12v-6h-2v4z"/></svg>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M7 7h10v3l4-4-4-4v3H5v6h2V7zm10 10H7v-3l-4 4 4 4v-3h12v-6h-2v4z" />
+        </svg>
       </button>
     </div>
   </div>
@@ -137,7 +140,7 @@ const onLoadedMetadata = () => {
   const allProgress = getProgress();
   const songProgress = allProgress[props.songId];
   const startAt = songProgress ? songProgress.currentTime : 0;
-  
+
   audioPlayer.value.currentTime = startAt;
   currentTime.value = startAt;
   saveProgress(startAt, duration.value);
@@ -274,9 +277,11 @@ defineExpose({ play });
   justify-content: center;
   transition: color 0.2s ease;
 }
+
 .control-btn:hover {
   color: white;
 }
+
 .control-btn.shuffle-btn.active {
   color: #1db954;
 }
@@ -292,6 +297,7 @@ defineExpose({ play });
   justify-content: center;
   transition: transform 0.2s ease;
 }
+
 .play-btn:hover {
   transform: scale(1.05);
 }
@@ -342,6 +348,7 @@ defineExpose({ play });
   opacity: 0;
   transition: opacity 0.2s ease;
 }
+
 .progress-bar:hover::-webkit-slider-thumb {
   opacity: 1;
 }
@@ -355,6 +362,7 @@ defineExpose({ play });
   opacity: 0;
   transition: opacity 0.2s ease;
 }
+
 .progress-bar:hover::-moz-range-thumb {
   opacity: 1;
 }
@@ -362,9 +370,10 @@ defineExpose({ play });
 .volume-controls {
   display: flex;
   align-items: center;
-  gap: 8px;
-  width: 150px;
-  flex-shrink: 0; /* Prevent shrinking */
+  gap: 2px;
+  width: 55px;
+  flex-shrink: 0;
+  /* Prevent shrinking */
 }
 
 .volume-icon {
