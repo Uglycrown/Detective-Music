@@ -91,7 +91,7 @@ const toggleShuffle = () => {
     // Restore the original order, but keep the current song at the top
     const restored = [...originalSongs.value];
     const currentIdx = restored.indexOf(currentSong.value);
-    if(currentIdx > -1) {
+    if (currentIdx > -1) {
       restored.splice(currentIdx, 1);
     }
     songs.value = [currentSong.value, ...restored.filter(s => s !== currentSong.value)];
@@ -265,16 +265,13 @@ const handleDeleteCancel = () => {
         <div class="welcome-section">
           <h2>Welcome back Detective (Gen-Z)</h2>
           <div class="quick-picks">
-            <div 
-              class="quick-pick-item" 
-              v-for="(song, index) in songs.slice(0, 6)" 
-              :key="song" 
-              @click="playSong(song)"
-              :class="{ 'quick-pick-active': currentSong === song }"
-            >
+            <div class="quick-pick-item" v-for="(song, index) in songs.slice(0, 6)" :key="song" @click="playSong(song)"
+              :class="{ 'quick-pick-active': currentSong === song }">
               <div class="quick-pick-cover">
                 <div class="cover-play-button">
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M8 5v14l11-7z" />
+                  </svg>
                 </div>
                 🎵
               </div>
@@ -289,23 +286,15 @@ const handleDeleteCancel = () => {
           </div>
         </div>
 
-        
+
       </div>
     </main>
 
     <!-- Now Playing Bar -->
     <div class="now-playing-bar" v-if="currentSong">
-      <CustomAudioPlayer
-        ref="player"
-        :src="`${API_BASE_URL}/api/songs/${currentSong}`"
-        :songId="currentSong"
-        :shuffleActive="isShuffled"
-        @ended="playNextSong"
-        @next="playNextSong"
-        @previous="playPreviousSong"
-        @progress="updateSongProgress"
-        @shuffle="toggleShuffle"
-      />
+      <CustomAudioPlayer ref="player" :src="`${API_BASE_URL}/api/songs/${currentSong}`" :songId="currentSong"
+        :shuffleActive="isShuffled" @ended="playNextSong" @next="playNextSong" @previous="playPreviousSong"
+        @progress="updateSongProgress" @shuffle="toggleShuffle" />
     </div>
 
     <!-- Upload Modal -->
@@ -342,17 +331,27 @@ const handleDeleteCancel = () => {
     </div>
 
     <!-- Delete Confirmation Modal -->
-    <ConfirmationModal
-      :isOpen="showDeleteModal"
-      title="Delete Song"
-      :message="`Are you sure you want to delete '${songToDelete}'?`"
-      @confirm="handleDeleteConfirm"
-      @cancel="handleDeleteCancel"
-    />
+    <ConfirmationModal :isOpen="showDeleteModal" title="Delete Song"
+      :message="`Are you sure you want to delete '${songToDelete}'?`" @confirm="handleDeleteConfirm"
+      @cancel="handleDeleteCancel" />
   </div>
 </template>
 
 <style scoped>
+@keyframes animated-gradient {
+  0% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
 * {
   box-sizing: border-box;
 }
@@ -366,21 +365,25 @@ const handleDeleteCancel = () => {
   grid-template-areas:
     "sidebar main"
     "now-playing now-playing";
-  background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
-  color: white;
+  background: linear-gradient(135deg, #1a1a1a 0%, #121212 100%);
+  background-size: 200% 200%;
+  animation: animated-gradient 20s ease infinite;
+  color: #e0e0e0;
   overflow: hidden;
 }
 
 /* Sidebar */
 .sidebar {
   grid-area: sidebar;
-  background: rgba(0, 0, 0, 0.9);
-  backdrop-filter: blur(10px);
+  background: rgba(10, 10, 10, 0.5);
+  backdrop-filter: blur(20px) saturate(180%);
   padding: 24px;
   display: flex;
   flex-direction: column;
-  border-right: 1px solid rgba(255, 255, 255, 0.1);
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
   transition: transform 0.3s ease;
+  box-shadow: 3px 0px 20px rgba(0, 0, 0, 0.3);
+  z-index: 10;
 }
 
 .sidebar-header {
@@ -397,10 +400,12 @@ const handleDeleteCancel = () => {
   display: flex;
   align-items: center;
   gap: 8px;
+  color: #fff;
 }
 
 .logo-icon {
   font-size: 24px;
+  color: #1db954;
 }
 
 .sidebar-close {
@@ -425,16 +430,22 @@ const handleDeleteCancel = () => {
 .nav-item {
   color: #b3b3b3;
   text-decoration: none;
-  font-weight: 500;
+  font-weight: 600;
   display: flex;
   align-items: center;
-  padding: 8px 0;
-  transition: color 0.2s ease;
+  padding: 10px;
+  border-radius: 8px;
+  transition: color 0.2s ease, background-color 0.2s ease;
 }
 
-.nav-item:hover,
+.nav-item:hover {
+  color: white;
+  background: rgba(255, 255, 255, 0.05);
+}
+
 .nav-item.active {
   color: white;
+  background: rgba(29, 185, 84, 0.2);
 }
 
 .create-playlist-btn {
@@ -443,41 +454,44 @@ const handleDeleteCancel = () => {
   color: white;
   padding: 12px 24px;
   border-radius: 25px;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
-  transition: background-color 0.2s ease;
+  transition: background-color 0.2s ease, transform 0.2s ease;
   margin-bottom: 32px;
 }
 
 .create-playlist-btn:hover {
   background: #1ed760;
+  transform: scale(1.03);
 }
 
 .playlist-section h3 {
   color: #b3b3b3;
-  font-size: 14px;
-  font-weight: 600;
+  font-size: 12px;
+  font-weight: 700;
   margin-bottom: 16px;
   text-transform: uppercase;
   letter-spacing: 1px;
+  padding: 0 10px;
 }
 
 .playlist-item {
   color: #b3b3b3;
-  padding: 8px 0;
+  padding: 10px;
   cursor: pointer;
-  transition: color 0.2s ease;
+  transition: color 0.2s ease, background-color 0.2s ease;
+  border-radius: 8px;
+  font-weight: 500;
 }
 
 .playlist-item:hover {
   color: white;
+  background: rgba(255, 255, 255, 0.05);
 }
 
 /* Main Content */
 .main-content {
   grid-area: main;
-  background: linear-gradient(135deg, rgba(30, 60, 114, 0.8) 0%, rgba(42, 82, 152, 0.8) 100%);
-  backdrop-filter: blur(10px);
   overflow-y: auto;
   display: flex;
   flex-direction: column;
@@ -491,11 +505,10 @@ const handleDeleteCancel = () => {
   left: 0;
   right: 0;
   bottom: 0;
-  background:
-    radial-gradient(circle at 20% 80%, rgba(29, 185, 84, 0.1) 0%, transparent 50%),
-    radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.05) 0%, transparent 50%);
+  background: radial-gradient(circle at 10% 10%, rgba(29, 185, 84, 0.1) 0%, transparent 30%),
+    radial-gradient(circle at 90% 80%, rgba(42, 82, 152, 0.1) 0%, transparent 40%);
   pointer-events: none;
-  z-index: 1;
+  z-index: 0;
 }
 
 .content-area {
@@ -507,64 +520,30 @@ const handleDeleteCancel = () => {
   display: flex;
   align-items: center;
   padding: 16px 32px;
-  background: rgba(0, 0, 0, 0.3);
-  backdrop-filter: blur(10px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(10, 10, 10, 0.3);
+  backdrop-filter: blur(15px) saturate(150%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   gap: 16px;
-}
-
-.menu-toggle {
-  display: none;
-  background: none;
-  border: none;
-  color: white;
-  font-size: 20px;
-  cursor: pointer;
-}
-
-.search-container {
-  flex: 1;
-  max-width: 400px;
+  position: sticky;
+  top: 0;
+  z-index: 5;
 }
 
 .search-input {
   width: 100%;
   padding: 12px 16px;
-  border: none;
+  border: 1px solid transparent;
   border-radius: 25px;
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.05);
   color: white;
   font-size: 14px;
   outline: none;
-  transition: background-color 0.2s ease;
-}
-
-.search-input::placeholder {
-  color: #b3b3b3;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
 }
 
 .search-input:focus {
-  background: rgba(255, 255, 255, 0.2);
-}
-
-.user-menu {
-  margin-left: auto;
-}
-
-.user-avatar {
-  width: 40px;
-  height: 40px;
   background: rgba(255, 255, 255, 0.1);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-}
-
-.user-avatar:hover {
-  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(29, 185, 84, 0.5);
 }
 
 /* Content Area */
@@ -575,57 +554,41 @@ const handleDeleteCancel = () => {
 
 .welcome-section h2 {
   font-size: 32px;
-  font-weight: 700;
+  font-weight: 800;
   margin-bottom: 24px;
+  color: #fff;
 }
 
 .quick-picks {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 20px;
   margin-bottom: 48px;
 }
 
 .quick-pick-item {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.03);
   border-radius: 8px;
   padding: 16px;
   display: flex;
   align-items: center;
   gap: 16px;
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(15px);
+  transition: all 0.3s ease;
+  border: 1px solid rgba(255, 255, 255, 0.08);
   position: relative;
-  overflow: hidden;
-}
-
-.quick-pick-item::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
-  transition: left 0.5s ease;
-}
-
-.quick-pick-item:hover::before {
-  left: 100%;
 }
 
 .quick-pick-item:hover {
-  background: rgba(255, 255, 255, 0.2);
-  transform: translateY(-3px) scale(1.02);
+  background: rgba(255, 255, 255, 0.07);
+  transform: translateY(-2px);
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
-  border-color: rgba(29, 185, 84, 0.3);
+  border-color: rgba(255, 255, 255, 0.15);
 }
 
 .quick-pick-active {
-  background: rgba(29, 185, 84, 0.3);
-  border-color: #1db954;
+  background: rgba(29, 185, 84, 0.2);
+  border-color: rgba(29, 185, 84, 0.8);
 }
 
 .quick-pick-active .quick-pick-title {
@@ -633,15 +596,16 @@ const handleDeleteCancel = () => {
 }
 
 .quick-pick-cover {
-  width: 50px;
-  height: 50px;
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 8px;
+  width: 56px;
+  height: 56px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 6px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 20px;
-  position: relative; /* For positioning the play button */
+  font-size: 24px;
+  position: relative;
+  flex-shrink: 0;
 }
 
 .cover-play-button {
@@ -649,9 +613,9 @@ const handleDeleteCancel = () => {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%) scale(0.8);
-  width: 40px;
-  height: 40px;
-  background: rgba(29, 185, 84, 0.8);
+  width: 44px;
+  height: 44px;
+  background: #1db954;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -659,6 +623,7 @@ const handleDeleteCancel = () => {
   color: white;
   opacity: 0;
   transition: all 0.2s ease;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
 }
 
 .quick-pick-item:hover .cover-play-button {
@@ -673,6 +638,8 @@ const handleDeleteCancel = () => {
 
 .quick-pick-title {
   font-weight: 600;
+  font-size: 16px;
+  color: #fff;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -694,17 +661,17 @@ const handleDeleteCancel = () => {
   align-items: center;
   justify-content: center;
   font-size: 14px;
-  opacity: 1; /* Always visible */
+  opacity: 1;
   transition: background-color 0.2s ease;
 }
 
 .delete-song-btn:hover {
-  background: rgba(255, 0, 0, 0.7);
+  background: #e53935;
 }
 
 .song-progress-bar-container {
   height: 4px;
-  background-color: rgba(255, 255, 255, 0.3);
+  background-color: rgba(255, 255, 255, 0.15);
   border-radius: 2px;
   margin-top: 8px;
   overflow: hidden;
@@ -720,12 +687,12 @@ const handleDeleteCancel = () => {
 /* Now Playing Bar */
 .now-playing-bar {
   grid-area: now-playing;
-  background: rgba(0, 0, 0, 0.9);
-  backdrop-filter: blur(10px);
+  background: #181818;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
   display: flex;
   align-items: center;
   padding: 8px 24px;
+  box-shadow: 0 -5px 20px rgba(0, 0, 0, 0.3);
 }
 
 /* Modal */
@@ -744,13 +711,13 @@ const handleDeleteCancel = () => {
 }
 
 .modal {
-  background: rgba(20, 20, 20, 0.95);
-  backdrop-filter: blur(20px);
+  background: #282828;
   border-radius: 12px;
   padding: 0;
   min-width: 500px;
   max-width: 90vw;
   border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
 }
 
 .modal-header {
@@ -1132,7 +1099,7 @@ const handleDeleteCancel = () => {
   }
 
   .now-playing-bar {
-    padding: 10px 14px;
+    padding: 10px 1px;
     background: rgba(0, 0, 0, 0.98);
     backdrop-filter: blur(25px);
   }
@@ -1286,7 +1253,7 @@ const handleDeleteCancel = () => {
 
   /* Compact Now Playing Bar */
   .now-playing-bar {
-    padding: 8px 12px;
+    padding: 8px 1px;
     gap: 8px;
     background: rgba(0, 0, 0, 0.98);
     backdrop-filter: blur(30px);

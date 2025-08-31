@@ -313,7 +313,7 @@ defineExpose({ play });
 .time-display {
   font-size: 12px;
   color: #b3b3b3;
-  min-width: 40px;
+  min-width: 15px;
   text-align: center;
 }
 
@@ -371,7 +371,7 @@ defineExpose({ play });
   display: flex;
   align-items: center;
   gap: 2px;
-  width: 63px;
+  width: 75px;
   flex-shrink: 0;
   /* Prevent shrinking */
 }
