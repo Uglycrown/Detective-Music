@@ -258,7 +258,7 @@ const truncate = (text, length) => {
     <!-- Main Content -->
     <main class="main-content">
       <!-- Header -->
-      <header class.top-bar">
+      <header class="top-bar">
         <button class="menu-toggle" @click="sidebarOpen = !sidebarOpen">☰</button>
         <div class="search-container">
           <input type="text" placeholder="Search for artists, songs, or podcasts" class="search-input">
@@ -643,7 +643,8 @@ const truncate = (text, length) => {
 .quick-pick-details {
   flex: 1;
   min-width: 0;
-  padding-right: 10px; /* Add some space for the delete button */
+  padding-right: 10px;
+  /* Add some space for the delete button */
   display: flex;
   align-items: center;
 }
