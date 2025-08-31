@@ -160,6 +160,7 @@ const updateSongProgress = (data) => {
     currentTime: data.currentTime,
     duration: data.duration,
   };
+  localStorage.setItem('song_progress', JSON.stringify(songProgress.value));
 };
 
 const getSongProgress = (song) => {
@@ -1016,10 +1017,12 @@ const truncate = (text, length) => {
     padding: 14px 16px;
     background: rgba(0, 0, 0, 0.5);
     backdrop-filter: blur(20px);
+    justify-content: space-between;
   }
 
   .search-container {
     max-width: 180px;
+    width: 100%;
   }
 
   .search-input {
