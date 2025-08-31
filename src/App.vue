@@ -413,7 +413,7 @@ const truncate = (text, length) => {
 
 .logo-icon {
   font-size: 24px;
-  color: #1db954;
+  color: #fff;
 }
 
 .sidebar-close {
@@ -453,13 +453,13 @@ const truncate = (text, length) => {
 
 .nav-item.active {
   color: white;
-  background: rgba(29, 185, 84, 0.2);
+  background: rgba(255, 255, 255, 0.1);
 }
 
 .create-playlist-btn {
-  background: #1db954;
+  background: #fff;
   border: none;
-  color: white;
+  color: #000;
   padding: 12px 24px;
   border-radius: 25px;
   font-weight: 700;
@@ -469,7 +469,7 @@ const truncate = (text, length) => {
 }
 
 .create-playlist-btn:hover {
-  background: #1ed760;
+  background: #ccc;
   transform: scale(1.03);
 }
 
@@ -596,8 +596,8 @@ const truncate = (text, length) => {
 }
 
 .quick-pick-active {
-  background: rgba(29, 185, 84, 0.2);
-  border-color: rgba(29, 185, 84, 0.8);
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.2);
 }
 
 .quick-pick-active .quick-pick-title {
@@ -624,12 +624,12 @@ const truncate = (text, length) => {
   transform: translate(-50%, -50%) scale(0.8);
   width: 44px;
   height: 44px;
-  background: #1db954;
+  background: #fff;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: white;
+  color: #000;
   opacity: 0;
   transition: all 0.2s ease;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
@@ -690,7 +690,7 @@ const truncate = (text, length) => {
 
 .song-progress-bar {
   height: 100%;
-  background-color: #1db954;
+  background-color: #fff;
   border-radius: 2px;
   transition: width 0.2s ease;
 }
@@ -806,9 +806,9 @@ const truncate = (text, length) => {
 
 .upload-btn,
 .download-btn {
-  background: #1db954;
+  background: #fff;
   border: none;
-  color: white;
+  color: #000;
   padding: 12px 24px;
   border-radius: 8px;
   font-weight: 600;
@@ -818,7 +818,7 @@ const truncate = (text, length) => {
 
 .upload-btn:hover,
 .download-btn:hover {
-  background: #1ed760;
+  background: #ccc;
 }
 
 .divider {
@@ -850,7 +850,7 @@ const truncate = (text, length) => {
 }
 
 .youtube-input:focus {
-  border-color: #1db954;
+  border-color: #fff;
 }
 
 /* Mobile Responsiveness */
@@ -882,6 +882,8 @@ const truncate = (text, length) => {
 
   .menu-toggle {
     display: block;
+    color: black;
+    background: white;
   }
 
   /* Enhanced Main Content Mobile Styles */
@@ -927,10 +929,7 @@ const truncate = (text, length) => {
     font-size: 28px;
     font-weight: 800;
     margin-bottom: 20px;
-    background: linear-gradient(45deg, #fff, #1db954);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    color: #fff;
   }
 
   .made-for-you h2 {
@@ -981,7 +980,7 @@ const truncate = (text, length) => {
   .quick-pick-cover {
     width: 45px;
     height: 45px;
-    background: linear-gradient(45deg, #1db954, #1ed760);
+    background: rgba(255, 255, 255, 0.1);
     border-radius: 8px;
   }
 
@@ -1201,10 +1200,7 @@ const truncate = (text, length) => {
     font-weight: 900;
     text-align: center;
     margin-bottom: 20px;
-    background: linear-gradient(45deg, #fff, #1db954, #1ed760);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    color: #fff;
   }
 
   .made-for-you h2 {
