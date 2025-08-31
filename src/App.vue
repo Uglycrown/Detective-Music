@@ -144,6 +144,39 @@ const getSongProgress = (song) => {
   return (progress.currentTime / progress.duration) * 100;
 };
 
+const deleteSong = async (song) => {
+  if (confirm(`Are you sure you want to delete ${song}?`)) {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/songs?filename=${encodeURIComponent(song)}`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        showNotification(`Song "${song}" deleted successfully!`);
+        fetchSongs(); // Refresh the song list
+
+        // Remove from local progress storage
+        const progress = songProgress.value;
+        delete progress[song];
+        songProgress.value = { ...progress }; // Trigger reactivity
+        localStorage.setItem('song_progress', JSON.stringify(progress));
+
+        // If the deleted song was the current one, stop playback
+        if (currentSong.value === song) {
+          currentSong.value = null;
+        }
+
+      } else {
+        const data = await response.json();
+        showNotification(`Failed to delete song: ${data.error}`, 'error');
+      }
+    } catch (error) {
+      console.error('Error deleting song:', error);
+      showNotification('Error deleting song', 'error');
+    }
+  }
+};
+
 </script>
 
 <template>
@@ -198,13 +231,14 @@ const getSongProgress = (song) => {
           <h2>Welcome back Detective (Gen-Z)</h2>
           <div class="quick-picks">
             <div class="quick-pick-item" v-for="(song, index) in songs.slice(0, 6)" :key="song" @click="playSong(song)">
-              <div class="quick-pick-cover">🎵</div>
-              <div class="quick-pick-details">
+              <div class="quick-pick-cover" @click.stop="playSong(song)">🎵</div>
+              <div class="quick-pick-details" @click.stop="playSong(song)">
                 <span class="quick-pick-title">{{ song.replace('.mp3', '') }}</span>
                 <div class="song-progress-bar-container">
                   <div class="song-progress-bar" :style="{ width: getSongProgress(song) + '%' }"></div>
                 </div>
               </div>
+              <button class="delete-song-btn" @click.stop="deleteSong(song)">🗑️</button>
             </div>
           </div>
         </div>
@@ -563,125 +597,31 @@ const getSongProgress = (song) => {
   display: block;
 }
 
-.made-for-you h2 {
-  font-size: 24px;
-  font-weight: 700;
-  margin-bottom: 24px;
-}
-
-.track-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 24px;
-}
-
-.track-card {
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 12px;
-  padding: 16px;
-  cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  position: relative;
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  overflow: hidden;
-}
-
-.track-card::before {
-  content: '';
+.delete-song-btn {
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(45deg, rgba(29, 185, 84, 0.1), rgba(30, 215, 96, 0.1));
-  opacity: 0;
-  transition: opacity 0.3s ease;
-  z-index: 1;
-}
-
-.track-card:hover::before {
-  opacity: 1;
-}
-
-.track-card:hover {
-  background: rgba(255, 255, 255, 0.15);
-  transform: translateY(-6px) scale(1.02);
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
-  border-color: rgba(29, 185, 84, 0.3);
-}
-
-.track-card.track-active {
-  background: rgba(29, 185, 84, 0.2);
-  border: 2px solid #1db954;
-  box-shadow: 0 8px 32px rgba(29, 185, 84, 0.4);
-}
-
-.track-card.track-active::before {
-  opacity: 0.5;
-}
-
-.track-cover {
-  width: 100%;
-  aspect-ratio: 1;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 16px;
-  position: relative;
-  overflow: hidden;
-}
-
-.track-placeholder {
-  font-size: 48px;
-  opacity: 0.5;
-}
-
-.play-button,
-.pause-button {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: rgba(29, 185, 84, 0.9);
-  width: 50px;
-  height: 50px;
+  top: 8px;
+  right: 8px;
+  background: rgba(0, 0, 0, 0.5);
+  border: none;
+  color: white;
   border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 20px;
-  opacity: 0;
+  font-size: 14px;
+  opacity: 0; /* Hide by default */
   transition: opacity 0.2s ease;
 }
 
-.track-card:hover .play-button,
-.track-card:hover .pause-button {
-  opacity: 1;
+.quick-pick-item:hover .delete-song-btn {
+  opacity: 1; /* Show on hover */
 }
 
-.track-info {
-  text-align: left;
-}
-
-.track-title {
-  font-size: 16px;
-  font-weight: 600;
-  margin: 0 0 4px 0;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.track-artist {
-  font-size: 14px;
-  color: #b3b3b3;
-  margin: 0;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+.delete-song-btn:hover {
+  background: rgba(255, 0, 0, 0.7);
 }
 
 .song-progress-bar-container {

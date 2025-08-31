@@ -166,6 +166,32 @@ app.get('/api/songs/:songName', (req, res) => {
   }
 });
 
+// Endpoint to delete a song
+app.delete('/api/songs', (req, res) => {
+  const songName = req.query.filename; // Get from query param
+  if (!songName) {
+    return res.status(400).json({ error: 'Filename is required' });
+  }
+
+  const songPath = path.join(musicDir, songName);
+
+  // Security check
+  if (path.dirname(songPath) !== musicDir) {
+    return res.status(400).json({ error: 'Invalid song name' });
+  }
+
+  fs.unlink(songPath, (err) => {
+    if (err) {
+      console.error(`Error deleting song ${songName}:`, err);
+      if (err.code === 'ENOENT') {
+        return res.status(404).json({ error: 'Song not found' });
+      }
+      return res.status(500).json({ error: 'Error deleting song' });
+    }
+    res.json({ message: `Song ${songName} deleted successfully` });
+  });
+});
+
 app.listen(port, '0.0.0.0', () => {
   console.log(`Server listening at http://localhost:${port}`);
 });
