@@ -612,12 +612,8 @@ const deleteSong = async (song) => {
   align-items: center;
   justify-content: center;
   font-size: 14px;
-  opacity: 0; /* Hide by default */
-  transition: opacity 0.2s ease;
-}
-
-.quick-pick-item:hover .delete-song-btn {
-  opacity: 1; /* Show on hover */
+  opacity: 1; /* Always visible */
+  transition: background-color 0.2s ease;
 }
 
 .delete-song-btn:hover {
