@@ -6,6 +6,7 @@ import ConfirmationModal from './components/ConfirmationModal.vue';
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://detective-music-production.up.railway.app';
 
 const songs = ref([]);
+const originalSongs = ref([]);
 const currentSong = ref(null);
 const fileInput = ref(null);
 const youtubeUrl = ref('');
@@ -15,6 +16,7 @@ const player = ref(null);
 const songProgress = ref({});
 const showDeleteModal = ref(false);
 const songToDelete = ref(null);
+const isShuffled = ref(false);
 
 const fetchSongs = async () => {
   try {
@@ -22,6 +24,7 @@ const fetchSongs = async () => {
     if (response.ok) {
       const data = await response.json();
       songs.value = data;
+      originalSongs.value = [...data]; // Keep a copy of the original order
     } else {
       console.error('Failed to fetch songs');
     }
@@ -74,6 +77,24 @@ const playPreviousSong = () => {
   const previousSong = getPreviousSong();
   if (previousSong) {
     playSong(previousSong);
+  }
+};
+
+const toggleShuffle = () => {
+  isShuffled.value = !isShuffled.value;
+  if (isShuffled.value) {
+    // Shuffle the current list, keeping the current song at the top
+    const remainingSongs = songs.value.filter(s => s !== currentSong.value);
+    remainingSongs.sort(() => Math.random() - 0.5);
+    songs.value = [currentSong.value, ...remainingSongs];
+  } else {
+    // Restore the original order, but keep the current song at the top
+    const restored = [...originalSongs.value];
+    const currentIdx = restored.indexOf(currentSong.value);
+    if(currentIdx > -1) {
+      restored.splice(currentIdx, 1);
+    }
+    songs.value = [currentSong.value, ...restored.filter(s => s !== currentSong.value)];
   }
 };
 
@@ -274,21 +295,16 @@ const handleDeleteCancel = () => {
 
     <!-- Now Playing Bar -->
     <div class="now-playing-bar" v-if="currentSong">
-      <div class="now-playing-track">
-        <div class="track-cover-small">🎵</div>
-        <div class="track-details">
-          <div class="track-name">{{ currentSong.replace('.mp3', '') }}</div>
-          <div class="artist-name">Unknown Artist</div>
-        </div>
-      </div>
       <CustomAudioPlayer
         ref="player"
         :src="`${API_BASE_URL}/api/songs/${currentSong}`"
         :songId="currentSong"
+        :shuffleActive="isShuffled"
         @ended="playNextSong"
         @next="playNextSong"
         @previous="playPreviousSong"
         @progress="updateSongProgress"
+        @shuffle="toggleShuffle"
       />
     </div>
 
@@ -346,7 +362,7 @@ const handleDeleteCancel = () => {
   height: 100vh;
   display: grid;
   grid-template-columns: 250px 1fr;
-  grid-template-rows: 1fr 90px;
+  grid-template-rows: 1fr auto;
   grid-template-areas:
     "sidebar main"
     "now-playing now-playing";
@@ -709,143 +725,7 @@ const handleDeleteCancel = () => {
   border-top: 1px solid rgba(255, 255, 255, 0.1);
   display: flex;
   align-items: center;
-  padding: 16px 24px;
-  gap: 24px;
-}
-
-.now-playing-track {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  min-width: 200px;
-}
-
-.track-cover-small {
-  width: 56px;
-  height: 56px;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 24px;
-}
-
-.track-details {
-  min-width: 0;
-}
-
-.track-name {
-  font-weight: 600;
-  font-size: 14px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.artist-name {
-  font-size: 12px;
-  color: #b3b3b3;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.player-controls {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-}
-
-.control-buttons {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.control-btn,
-.play-btn {
-  background: none;
-  border: none;
-  color: white;
-  font-size: 20px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: color 0.2s ease;
-}
-
-.play-btn {
-  width: 40px;
-  height: 40px;
-  background: white;
-  color: black;
-  border-radius: 50%;
-  font-size: 16px;
-}
-
-.control-btn:hover {
-  color: #1db954;
-}
-
-.progress-container {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  width: 100%;
-  max-width: 500px;
-}
-
-.time-display {
-  font-size: 12px;
-  color: #b3b3b3;
-  min-width: 40px;
-  text-align: center;
-}
-
-.progress-bar {
-  flex: 1;
-  height: 4px;
-  background: rgba(255, 255, 255, 0.3);
-  border-radius: 2px;
-  cursor: pointer;
-  position: relative;
-}
-
-.progress-fill {
-  height: 100%;
-  background: #1db954;
-  border-radius: 2px;
-  transition: width 0.1s ease;
-}
-
-.volume-controls {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  min-width: 120px;
-}
-
-.volume-icon {
-  font-size: 16px;
-}
-
-.volume-bar {
-  width: 80px;
-  height: 4px;
-  background: rgba(255, 255, 255, 0.3);
-  border-radius: 2px;
-  cursor: pointer;
-  position: relative;
-}
-
-.volume-fill {
-  height: 100%;
-  background: #1db954;
-  border-radius: 2px;
+  padding: 8px 24px;
 }
 
 /* Modal */
