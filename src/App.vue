@@ -212,6 +212,12 @@ const handleDeleteCancel = () => {
   songToDelete.value = null;
 };
 
+const truncate = (text, length) => {
+  if (text.length > length) {
+    return text.substring(0, length) + '...';
+  }
+  return text;
+};
 </script>
 
 <template>
@@ -276,7 +282,7 @@ const handleDeleteCancel = () => {
                 🎵
               </div>
               <div class="quick-pick-details">
-                <span class="quick-pick-title">{{ song.replace('.mp3', '') }}</span>
+                <span class="quick-pick-title">{{ truncate(song.replace('.mp3', ''), 30) }}</span>
                 <div class="song-progress-bar-container">
                   <div class="song-progress-bar" :style="{ width: getSongProgress(song) + '%' }"></div>
                 </div>
@@ -577,6 +583,7 @@ const handleDeleteCancel = () => {
   transition: all 0.3s ease;
   border: 1px solid rgba(255, 255, 255, 0.08);
   position: relative;
+  justify-content: space-between;
 }
 
 .quick-pick-item:hover {
@@ -634,6 +641,9 @@ const handleDeleteCancel = () => {
 .quick-pick-details {
   flex: 1;
   min-width: 0;
+  padding-right: 10px; /* Add some space for the delete button */
+  display: flex;
+  align-items: center;
 }
 
 .quick-pick-title {
@@ -644,12 +654,10 @@ const handleDeleteCancel = () => {
   overflow: hidden;
   text-overflow: ellipsis;
   display: block;
+  max-width: 234.2px;
 }
 
 .delete-song-btn {
-  position: absolute;
-  top: 8px;
-  right: 8px;
   background: rgba(0, 0, 0, 0.5);
   border: none;
   color: white;
