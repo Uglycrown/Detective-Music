@@ -58,17 +58,19 @@
           </svg>
         </button>
       </div>
-      <button class="control-btn">
+      <button @click="showSleepTimerModal = true" class="control-btn" :class="{ active: isTimerActive }">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M7 7h10v3l4-4-4-4v3H5v6h2V7zm10 10H7v-3l-4 4 4 4v-3h12v-6h-2v4z" />
+          <path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/>
         </svg>
       </button>
     </div>
+    <SleepTimerModal v-if="showSleepTimerModal" @close="showSleepTimerModal = false" @set-timer="setSleepTimer" />
   </div>
 </template>
 
 <script setup>
 import { ref, watch, defineExpose, onUnmounted, computed } from 'vue';
+import SleepTimerModal from './SleepTimerModal.vue';
 
 const props = defineProps({
   src: String,
@@ -87,11 +89,40 @@ const currentTime = ref(0);
 const duration = ref(0);
 const volume = ref(0.5);
 const lastSaveTime = ref(0);
+const showSleepTimerModal = ref(false);
+const sleepTimer = ref(null);
+const sleepTimerDuration = ref(0);
 
 const songTitle = computed(() => {
   if (!props.songId) return 'No song selected';
   return props.songId.replace('.mp3', '');
 });
+
+const isTimerActive = computed(() => sleepTimer.value !== null);
+
+// --- Sleep Timer ---
+const setSleepTimer = (minutes) => {
+  if (sleepTimer.value) {
+    clearTimeout(sleepTimer.value);
+  }
+  sleepTimerDuration.value = minutes;
+  const milliseconds = minutes * 60 * 1000;
+  sleepTimer.value = setTimeout(() => {
+    if (isPlaying.value) {
+      togglePlay();
+    }
+    sleepTimer.value = null;
+    sleepTimerDuration.value = 0;
+  }, milliseconds);
+};
+
+const clearSleepTimer = () => {
+  if (sleepTimer.value) {
+    clearTimeout(sleepTimer.value);
+    sleepTimer.value = null;
+    sleepTimerDuration.value = 0;
+  }
+};
 
 // --- Progress Management ---
 const getProgress = () => {
@@ -156,6 +187,7 @@ onUnmounted(() => {
   if (audioPlayer.value) {
     saveProgress(audioPlayer.value.currentTime, duration.value);
   }
+  clearSleepTimer();
 });
 
 // --- Playback Controls ---
@@ -283,6 +315,10 @@ defineExpose({ play });
 }
 
 .control-btn.shuffle-btn.active {
+  color: #1db954;
+}
+
+.control-btn.active {
   color: #1db954;
 }
 

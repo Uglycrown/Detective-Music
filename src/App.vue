@@ -19,6 +19,7 @@ const songProgress = ref({});
 const showDeleteModal = ref(false);
 const songToDelete = ref(null);
 const isShuffled = ref(false);
+const isTimerActive = ref(false);
 
 const fetchSongs = async () => {
   try {
@@ -221,6 +222,10 @@ const truncate = (text, length) => {
   }
   return text;
 };
+
+const clearSleepTimer = () => {
+  player.value?.clearSleepTimer();
+};
 </script>
 
 <template>
@@ -267,6 +272,10 @@ const truncate = (text, length) => {
       <div class="content-area">
         <div class="welcome-section">
           <h2>Welcome back Detective (Gen-Z)</h2>
+          <div v-if="isTimerActive" class="active-timer-display">
+            <span>Sleep timer is active.</span>
+            <button @click="clearSleepTimer">Cancel</button>
+          </div>
           <div class="quick-picks">
             <div class="quick-pick-item" v-for="(song, index) in songs.slice(0, 6)" :key="song" @click="playSong(song)"
               :class="{ 'quick-pick-active': currentSong === song }">
@@ -295,7 +304,7 @@ const truncate = (text, length) => {
     <div class="now-playing-bar" v-if="currentSong">
       <CustomAudioPlayer ref="player" :src="`${API_BASE_URL}/api/songs/${currentSong}`" :songId="currentSong"
         :shuffleActive="isShuffled" @ended="playNextSong" @next="playNextSong" @previous="playPreviousSong"
-        @progress="updateSongProgress" @shuffle="toggleShuffle" />
+        @progress="updateSongProgress" @shuffle="toggleShuffle" v-model:isTimerActive="isTimerActive" />
     </div>
 
     <!-- Upload Modal -->
@@ -1483,6 +1492,26 @@ const truncate = (text, length) => {
 .logo-icon-img:hover,
 .user-avatar:hover {
   animation: detectiveGlow 2s ease-in-out infinite;
+}
+
+.active-timer-display {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(29, 185, 84, 0.2);
+  color: #1db954;
+  padding: 10px 15px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+.active-timer-display button {
+  background: #1db954;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 5px;
+  cursor: pointer;
 }
 
 /* ...existing styles remain the same... */
