@@ -165,7 +165,6 @@ const updateSongProgress = (data) => {
 
 const getSongProgress = (song) => {
   const progress = songProgress.value[song];
-  console.log('progress', progress);
   if (!progress || !progress.duration) return 0;
   return (progress.currentTime / progress.duration) * 100;
 };
