@@ -237,8 +237,6 @@ const truncate = (text, length) => {
       <nav class="sidebar-nav">
         <ul>
           <li><a href="#" class="nav-item active">🏠 Home</a></li>
-          <li><a href="#" class="nav-item">🔍 Search</a></li>
-          <li><a href="#" class="nav-item">📚 Your Library</a></li>
         </ul>
       </nav>
 
@@ -248,11 +246,7 @@ const truncate = (text, length) => {
         </button>
       </div>
 
-      <div class="playlist-section">
-        <h3>Your Playlists</h3>
-        <div class="playlist-item">🎵 My Playlist #1</div>
-        <div class="playlist-item">🎵 Favorites</div>
-      </div>
+
     </aside>
 
     <!-- Main Content -->
