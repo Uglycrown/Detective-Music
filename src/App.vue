@@ -2,6 +2,8 @@
 import { ref, onMounted, computed, nextTick } from 'vue';
 import CustomAudioPlayer from './components/CustomAudioPlayer.vue';
 import ConfirmationModal from './components/ConfirmationModal.vue';
+// Import the detective image
+import detectiveImage from './assets/detective.png';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://detective-music-production.up.railway.app';
 
@@ -227,7 +229,7 @@ const truncate = (text, length) => {
     <aside class="sidebar" :class="{ 'sidebar-open': sidebarOpen }">
       <div class="sidebar-header">
         <h1 class="logo">
-          <span class="logo-icon">🎵</span>
+          <img :src="detectiveImage" alt="Detective Music" class="logo-icon-img">
           Detective Music
         </h1>
         <button class="sidebar-close" @click="sidebarOpen = false">×</button>
@@ -244,8 +246,6 @@ const truncate = (text, length) => {
           ➕ Add Music
         </button>
       </div>
-
-
     </aside>
 
     <!-- Main Content -->
@@ -257,7 +257,9 @@ const truncate = (text, length) => {
           <input type="text" placeholder="Search for artists, songs, or podcasts" class="search-input">
         </div>
         <div class="user-menu">
-          <div class="user-avatar">👤</div>
+          <div class="user-avatar">
+            <img :src="detectiveImage" alt="Detective User" class="user-avatar-img">
+          </div>
         </div>
       </header>
 
@@ -286,8 +288,6 @@ const truncate = (text, length) => {
             </div>
           </div>
         </div>
-
-
       </div>
     </main>
 
@@ -1364,21 +1364,126 @@ const truncate = (text, length) => {
   }
 }
 
-/* Scrollbar Styling */
-::-webkit-scrollbar {
-  width: 8px;
+/* Logo image styling */
+.logo-icon-img {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  margin-right: 12px;
+  object-fit: cover;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.1);
+.logo-icon-img:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(29, 185, 84, 0.4);
 }
 
-::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.3);
-  border-radius: 4px;
+/* User avatar image styling */
+.user-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  border: 2px solid #1db954;
 }
 
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.5);
+.user-avatar:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(29, 185, 84, 0.4);
 }
+
+.user-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Enhanced logo styling */
+.logo {
+  display: flex;
+  align-items: center;
+  color: #ffffff;
+  font-size: 1.5rem;
+  font-weight: 700;
+  text-decoration: none;
+  padding: 20px;
+  border-bottom: 1px solid #333;
+  margin-bottom: 20px;
+}
+
+/* Mobile responsiveness for logo */
+@media (max-width: 768px) {
+  .logo-icon-img {
+    width: 28px;
+    height: 28px;
+    margin-right: 8px;
+  }
+
+  .logo {
+    font-size: 1.3rem;
+    padding: 15px;
+  }
+
+  .user-avatar {
+    width: 36px;
+    height: 36px;
+  }
+}
+
+@media (max-width: 480px) {
+  .logo-icon-img {
+    width: 24px;
+    height: 24px;
+    margin-right: 6px;
+  }
+
+  .logo {
+    font-size: 1.1rem;
+    padding: 12px;
+  }
+
+  .user-avatar {
+    width: 32px;
+    height: 32px;
+  }
+}
+
+/* Add some glow effect for detective theme */
+.sidebar-header {
+  background: linear-gradient(135deg, rgba(29, 185, 84, 0.1) 0%, rgba(0, 0, 0, 0.2) 100%);
+  backdrop-filter: blur(10px);
+  border-radius: 12px;
+  margin: 10px;
+}
+
+.top-bar {
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Enhanced animations */
+@keyframes detectiveGlow {
+
+  0%,
+  100% {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  }
+
+  50% {
+    box-shadow: 0 4px 16px rgba(29, 185, 84, 0.6);
+  }
+}
+
+.logo-icon-img:hover,
+.user-avatar:hover {
+  animation: detectiveGlow 2s ease-in-out infinite;
+}
+
+/* ...existing styles remain the same... */
 </style>

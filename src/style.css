@@ -2,7 +2,7 @@
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   line-height: 1.5;
   font-weight: 400;
-  
+
   color-scheme: dark;
   color: rgba(255, 255, 255, 0.87);
   background: #000000;
@@ -27,7 +27,12 @@ body {
   overflow: hidden;
 }
 
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   font-weight: 600;
   line-height: 1.2;
 }
@@ -136,6 +141,7 @@ html {
     opacity: 0;
     transform: translateY(20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -143,9 +149,12 @@ html {
 }
 
 @keyframes pulse {
-  0%, 100% {
+
+  0%,
+  100% {
     opacity: 1;
   }
+
   50% {
     opacity: 0.5;
   }
@@ -156,6 +165,7 @@ html {
     transform: translateX(-100%);
     opacity: 0;
   }
+
   to {
     transform: translateX(0);
     opacity: 1;
@@ -167,6 +177,7 @@ html {
     transform: translateX(100%);
     opacity: 0;
   }
+
   to {
     transform: translateX(0);
     opacity: 1;
@@ -219,7 +230,7 @@ html {
   :root {
     font-size: 14px;
   }
-  
+
   h1 {
     font-size: 2rem;
   }
@@ -229,8 +240,58 @@ html {
   :root {
     font-size: 13px;
   }
-  
+
   h1 {
     font-size: 1.75rem;
+  }
+}
+
+/* Detective theme enhancements */
+.detective-theme {
+  --detective-primary: #1db954;
+  --detective-secondary: #ffd700;
+  --detective-accent: #ff6b35;
+  --detective-dark: #0d1421;
+  --detective-light: #ffffff;
+}
+
+/* Add detective-themed gradients */
+.sidebar-header::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(45deg,
+      rgba(29, 185, 84, 0.1) 0%,
+      rgba(255, 215, 0, 0.05) 50%,
+      rgba(255, 107, 53, 0.1) 100%);
+  border-radius: inherit;
+  z-index: -1;
+}
+
+/* Enhanced user menu with detective styling */
+.user-menu {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+
+/* Detective-themed hover effects */
+.nav-item:hover,
+.create-playlist-btn:hover,
+.quick-pick-item:hover {
+  background: linear-gradient(135deg,
+      rgba(29, 185, 84, 0.2) 0%,
+      rgba(255, 215, 0, 0.1) 100%);
+  border-left: 3px solid var(--detective-primary);
+}
+
+/* Mobile detective theme adjustments */
+@media (max-width: 768px) {
+  .user-menu::after {
+    font-size: 12px;
   }
 }
